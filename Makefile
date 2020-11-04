@@ -7,14 +7,14 @@ GOLANGCILINT := bin/golangci-lint
 GOLANGCILINT_VERSION ?= 1.31.0
 
 OPENAPIGENERATORCLI := scripts/openapi-generator-cli
-OPENAPIGENERATORCLI_VERSION :=
+OPENAPIGENERATORCLI_VERSION ?= 4.3.1
 
 KIND := bin/kind
 KIND_VERSION ?= 0.9.0
 KIND_CLUSTER_NAME ?= local
 
 SKAFFOLD := bin/skaffold
-SKAFFOLD_VERSION := 1.16.0
+SKAFFOLD_VERSION ?= 1.16.0
 
 KUBERNETES_VERSION ?= 1.17.11
 KUBERNETES_CONTEXT := kind-$(KIND_CLUSTER_NAME)
@@ -38,6 +38,7 @@ $(KIND): ; $(info $(bullet) Installing <kind>)
 	chmod u+x $(KIND)
 
 $(SKAFFOLD): ; $(info $(bullet) Installing <skaffold>)
+	@mkdir -p bin
 	curl -sSfL https://storage.googleapis.com/skaffold/releases/v$(SKAFFOLD_VERSION)/skaffold-$(OS)-amd64 -o $(SKAFFOLD)
 	chmod u+x $(SKAFFOLD)
 
@@ -55,7 +56,7 @@ generate-sqlc: $(SQLC) ; $(info $(bullet) Generating <sqlc>)
 	$(SQLC) generate
 
 generate-openapi: $(SQLC) ; $(info $(bullet) Generating <openapi>)
-	$(OPENAPIGENERATORCLI) generate \
+	OPENAPIGENERATORCLI_VERSION=$(OPENAPIGENERATORCLI_VERSION) $(OPENAPIGENERATORCLI) generate \
 		--input-spec api/todo.yaml \
 		--output pkg/api/todo \
 		--generator-name go-experimental \
@@ -82,4 +83,4 @@ bootstrap-kind: $(KIND); $(info $(bullet) Bootstrap <kind>)
 bootstrap-deploy: $(SKAFFOLD); $(info $(bullet) Bootstrap <deploy>)
 	$(SKAFFOLD) build -q | $(SKAFFOLD) deploy -p bootstrap --kube-context=$(KUBERNETES_CONTEXT) --build-artifacts -
 
-bootstrap: bootstrap-kind bootstrap-deploy
+bootstrap: $(KIND) $(SKAFFOLD) bootstrap-kind bootstrap-deploy
