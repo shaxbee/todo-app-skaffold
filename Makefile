@@ -73,6 +73,7 @@ test-coverage: ; $(info $(bullet) Running tests with coverage)
 	go test -cover ./...
 
 bootstrap-kind: $(KIND); $(info $(bullet) Bootstrap <kind>)
+	$(KIND) get clusters | grep -q $(KIND_CLUSTER_NAME) || \
 	$(KIND) create cluster \
 		--name $(KIND_CLUSTER_NAME) \
 		--image kindest/node:v$(KUBERNETES_VERSION) \

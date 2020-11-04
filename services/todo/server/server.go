@@ -2,10 +2,8 @@ package server
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -13,6 +11,7 @@ import (
 
 	"github.com/shaxbee/todo-app-skaffold/pkg/api/todo"
 	"github.com/shaxbee/todo-app-skaffold/pkg/httperror"
+	"github.com/shaxbee/todo-app-skaffold/pkg/routes"
 	"github.com/shaxbee/todo-app-skaffold/services/todo/model"
 )
 
@@ -49,19 +48,11 @@ func (s *TodoServer) Get(w http.ResponseWriter, req *http.Request) error {
 		return fmt.Errorf("failed to get todo: %w", err)
 	}
 
-	data, err := json.Marshal(todo.Todo{
+	return routes.JSONResponseBody(w, todo.Todo{
 		Id:      t.ID,
 		Title:   t.Title,
 		Content: t.Content,
 	})
-	if err != nil {
-		return fmt.Errorf("failed to marshal Todo: %w", err)
-	}
-
-	_, _ = w.Write(data)
-	w.WriteHeader(http.StatusOK)
-
-	return nil
 }
 
 func (s *TodoServer) List(w http.ResponseWriter, req *http.Request) error {
@@ -81,29 +72,15 @@ func (s *TodoServer) List(w http.ResponseWriter, req *http.Request) error {
 		}
 	}
 
-	data, err := json.Marshal(resTodos)
-	if err != nil {
-		return err
-	}
-
-	_, _ = w.Write(data)
-	return nil
+	return routes.JSONResponseBody(w, resTodos)
 }
 
 func (s *TodoServer) Create(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
-	reqData, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return err
-	}
-
 	var ctReq todo.CreateTodoRequest
-	if err := json.Unmarshal(reqData, &ctReq); err != nil {
-		return httperror.New(
-			http.StatusBadRequest,
-			httperror.Cause(err),
-		)
+	if err := routes.JSONRequestBody(req, &ctReq); err != nil {
+		return err
 	}
 
 	id, err := uuid.NewRandom()
@@ -120,13 +97,7 @@ func (s *TodoServer) Create(w http.ResponseWriter, req *http.Request) error {
 		return fmt.Errorf("failed to create todo: %w", err)
 	}
 
-	resData, err := json.Marshal(todo.CreateTodoResponse{
+	return routes.JSONResponseBody(w, todo.CreateTodoResponse{
 		Id: id,
 	})
-	if err != nil {
-		return err
-	}
-
-	_, _ = w.Write(resData)
-	return nil
 }

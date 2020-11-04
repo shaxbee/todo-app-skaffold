@@ -17,7 +17,7 @@ Bootstrap Kubernetes cluster in docker:
 make bootstrap
 ```
 
-This will download [kind](https://github.com/kubernetes-sigs/kind) and create local cluster running in Docker.
+This will setup local cluster running in Docker using [kind](https://github.com/kubernetes-sigs/kind).
 
 Bootstrap might take some time to deploy Postgres.
 
