@@ -1,11 +1,11 @@
 # Skaffold Todo App
 
-TODO App built in Go with [Skaffold](https://github.com/GoogleContainerTools/skaffold) deployment.
+Todo App built in Go with [Skaffold](https://github.com/GoogleContainerTools/skaffold) deployment.
 
 ## Prerequisites
 
-Docker is used for running the project.
-Install it using [Get Docker](https://docs.docker.com/get-docker/) guide.
+- [Docker](https://docs.docker.com/get-docker/).
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 ## Development
 
@@ -33,11 +33,6 @@ Terminating the run will destroy all resources except Postgres.
 
 Skaffold will build Docker images and deploy the stack to the cluster.
 
-Ports:
-
-- `:8080` API
-- `:5432` Postgres
-
 ### Develop
 
 Continously develop stack:
@@ -46,9 +41,32 @@ Continously develop stack:
 bin/skaffold dev --force --port-forward
 ```
 
-If files change affected artifacts will be built and re-deployed automatically.
+If files change the affected artifacts will be built and re-deployed automatically.
 
-Ports remain the same as in [Run](#run).
+### Test
+
+Following ports are exposed:
+
+- `:8080` API
+- `:5432` Postgres
+
+Create a note:
+
+```sh
+curl -s -X POST -H 'Content-Type: application/json' http://:8080/api/v1/todo -d '{"title": "Foo", "content": "Bar"}' | jq
+```
+
+Get a note:
+
+```sh
+curl -s http://:8080/api/v1/todo/:id | jq
+```
+
+List notes:
+
+```sh
+curl -s http://:8080/api/v1/todo | jq
+```
 
 ### Cleanup
 
