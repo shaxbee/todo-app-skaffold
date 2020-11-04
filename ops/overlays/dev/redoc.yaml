@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redoc
+spec:
+  selector:
+    app: redoc
+  ports:
+    - port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redoc
+  labels:
+    app: redoc
+spec:
+  selector:
+    matchLabels:
+      app: redoc
+  template:
+    metadata:
+      labels:
+        app: redoc
+    spec:
+      containers:
+        - name: redoc
+          image: redoc

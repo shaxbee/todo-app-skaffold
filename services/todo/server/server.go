@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/shaxbee/todo-app-skaffold/pkg/api/todo"
+	"github.com/shaxbee/todo-app-skaffold/pkg/api"
 	"github.com/shaxbee/todo-app-skaffold/pkg/httperror"
 	"github.com/shaxbee/todo-app-skaffold/pkg/routes"
 	"github.com/shaxbee/todo-app-skaffold/services/todo/model"
@@ -48,7 +48,7 @@ func (s *TodoServer) Get(w http.ResponseWriter, req *http.Request) error {
 		return fmt.Errorf("failed to get todo: %w", err)
 	}
 
-	return routes.JSONResponseBody(w, todo.Todo{
+	return routes.JSONResponseBody(w, api.Todo{
 		Id:      t.ID,
 		Title:   t.Title,
 		Content: t.Content,
@@ -63,9 +63,9 @@ func (s *TodoServer) List(w http.ResponseWriter, req *http.Request) error {
 		return fmt.Errorf("failed to list todos: %w", err)
 	}
 
-	resTodos := make([]todo.Todo, len(todos))
+	resTodos := make([]api.Todo, len(todos))
 	for i, t := range todos {
-		resTodos[i] = todo.Todo{
+		resTodos[i] = api.Todo{
 			Id:      t.ID,
 			Title:   t.Title,
 			Content: t.Content,
@@ -78,7 +78,7 @@ func (s *TodoServer) List(w http.ResponseWriter, req *http.Request) error {
 func (s *TodoServer) Create(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
-	var ctReq todo.CreateTodoRequest
+	var ctReq api.CreateTodoRequest
 	if err := routes.JSONRequestBody(req, &ctReq); err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (s *TodoServer) Create(w http.ResponseWriter, req *http.Request) error {
 		return fmt.Errorf("failed to create todo: %w", err)
 	}
 
-	return routes.JSONResponseBody(w, todo.CreateTodoResponse{
+	return routes.JSONResponseBody(w, api.CreateTodoResponse{
 		Id: id,
 	})
 }

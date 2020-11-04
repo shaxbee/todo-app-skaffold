@@ -3,6 +3,7 @@ kind: Kustomization
 bases:
   - ../../base
 resources:
+  - redoc.yaml
   - todo-db-credentials.yaml
 patchesStrategicMerge:
   - todo.yaml

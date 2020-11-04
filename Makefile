@@ -57,10 +57,10 @@ generate-sqlc: $(SQLC) ; $(info $(bullet) Generating <sqlc>)
 
 generate-openapi: $(SQLC) ; $(info $(bullet) Generating <openapi>)
 	OPENAPIGENERATORCLI_VERSION=$(OPENAPIGENERATORCLI_VERSION) $(OPENAPIGENERATORCLI) generate \
-		--input-spec api/todo.yaml \
-		--output pkg/api/todo \
+		--input-spec api/api.yaml \
+		--output pkg/api \
 		--generator-name go-experimental \
-		--package-name=todo \
+		--package-name=api \
 		--additional-properties withGoCodegenComment \
 		--import-mappings=uuid.UUID=github.com/google/uuid --type-mappings=UUID=uuid.UUID \
 
