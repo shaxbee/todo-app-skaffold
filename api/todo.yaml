@@ -1,0 +1,113 @@
+openapi: 3.0.0
+info:
+  title: Todo API
+  description: Todo API
+  version: "0.1"
+paths:
+  /api/v1/todo/{id}:
+    get:
+      summary: Get todo
+      operationId: getTodo
+      tags:
+        - todo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Todo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+        default:
+          $ref: "#/components/responses/OperationFailed"
+  /api/v1/todo:
+    get:
+      summary: List todos
+      operationId: listTodos
+      tags:
+        - todo
+      responses:
+        "200":
+          description: Todo
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Todo"
+        default:
+          $ref: "#/components/responses/OperationFailed"
+    post:
+      summary: Create todo
+      operationId: createTodo
+      tags:
+        - todo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTodoRequest"
+      responses:
+        "201":
+          description: Todo was created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateTodoResponse"
+        default:
+          $ref: "#/components/responses/OperationFailed"
+components:
+  responses:
+    OperationFailed:
+      description: Operation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    Todo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+      required:
+        - id
+        - title
+        - content
+    CreateTodoRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+      required:
+        - title
+        - content
+    CreateTodoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+      required:
+        - id
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message

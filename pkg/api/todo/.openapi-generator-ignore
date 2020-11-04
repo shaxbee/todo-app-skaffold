@@ -1,0 +1,9 @@
+# OpenAPI Generator Ignore
+
+docs/
+api/
+go.mod
+go.sum
+README.md
+*.sh
+.travis.yml

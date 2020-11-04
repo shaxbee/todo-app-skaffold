@@ -1,0 +1,40 @@
+apiVersion: skaffold/v2beta9
+kind: Config
+metadata:
+  name: todo-app-skaffold
+build:
+  artifacts:
+    - image: goose
+      docker:
+        dockerfile: cmd/goose/Dockerfile
+    - image: todo
+      docker:
+        dockerfile: services/todo/Dockerfile
+deploy:
+  statusCheckDeadlineSeconds: 300
+profiles:
+  - name: bootstrap
+    deploy:
+      kustomize:
+        paths:
+          - ops/bootstrap/overlays/dev
+      kubeContext: kind-local
+  - name: local
+    activation:
+      - kubeContext: kind-local
+      - command: dev
+      - command: run
+    deploy:
+      kustomize:
+        paths:
+          - ops/overlays/dev
+      kubeContext: kind-local
+    portForward:
+      - resourceType: service
+        resourceName: todo
+        port: 80
+        localPort: 8080
+        address: 0.0.0.0
+      - resourceType: service
+        resourceName: postgres
+        port: 5432

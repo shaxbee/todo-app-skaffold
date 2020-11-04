@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo
+spec:
+  selector:
+    app: todo
+  ports:
+    - port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo
+  labels:
+    app: todo
+spec:
+  selector:
+    matchLabels:
+      app: todo
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      containers:
+        - name: todo
+          image: todo
+          envFrom:
+            - secretRef:
+                name: todo-db-credentials
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: todo-schema
+  labels:
+    app: todo
+spec:
+  ttlSecondsAfterFinished: 0
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: goose
+          image: goose
+          command:
+            - "goose"
+            - "-dir"
+            - "./services/todo/migrations"
+            - "postgres"
+            - "postgres://"
+            - "up"
+          envFrom:
+            - secretRef:
+                name: todo-db-credentials

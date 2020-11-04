@@ -1,0 +1,7 @@
+version: "1"
+packages:
+  - name: "model"
+    path: "services/todo/model"
+    queries: "services/todo/model/queries.sql"
+    schema: "services/todo/migrations/"
+    engine: "postgresql"
