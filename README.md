@@ -48,6 +48,7 @@ If files change the affected artifacts will be built and re-deployed automatical
 Following ports are exposed:
 
 - `:8080` API
+- `:9000` API Documentation
 - `:5432` Postgres
 
 Create a note:
