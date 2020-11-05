@@ -2,6 +2,12 @@
 
 Todo App built in Go with [Skaffold](https://github.com/GoogleContainerTools/skaffold) deployment.
 
+## Features
+
+- [sqlc](https://github.com/kyleconroy/sqlc) - generate database interface and models from migrations and queries
+- [openapi-generator](https://github.com/OpenAPITools/openapi-generator) - generate models and clients from OpenAPI spec
+- [dockertest](https://github.com/ory/dockertest) - spin up postgres in docker for integration tests
+
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/).

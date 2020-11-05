@@ -1,15 +1,13 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
 	"log"
 	"os"
-	"time"
 
-	"github.com/cenkalti/backoff"
 	"github.com/pressly/goose"
+	"github.com/shaxbee/todo-app-skaffold/pkg/dbutil"
 
 	_ "github.com/lib/pq"
 )
@@ -77,20 +75,7 @@ func main() {
 	default:
 	}
 
-	bo := backoff.NewExponentialBackOff()
-	bo.MaxInterval = 5 * time.Second
-	bo.MaxElapsedTime = 1 * time.Minute
-
-	var db *sql.DB
-	err := backoff.Retry(func() error {
-		var err error
-		db, err = sql.Open("postgres", dbstring)
-		if err != nil {
-			return err
-		}
-
-		return db.Ping()
-	}, bo)
+	db, err := dbutil.Open(driver, dbstring)
 	if err != nil {
 		log.Fatalf("-dbstring=%q: %v\n", dbstring, err)
 	}

@@ -63,6 +63,16 @@ paths:
                 $ref: "#/components/schemas/CreateTodoResponse"
         default:
           $ref: "#/components/responses/OperationFailed"
+    delete:
+      summary: Delete all todos
+      operationId: deleteAllTodos
+      tags:
+        - todo
+      responses:
+        "204":
+          description: All todos were deleted
+        default:
+          $ref: "#/components/responses/OperationFailed"
 components:
   responses:
     OperationFailed:

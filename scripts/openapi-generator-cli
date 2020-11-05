@@ -3,7 +3,7 @@ set -eu
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null 2>&1 && pwd )"
 DOCKER_RUN_OPTIONS="${OPTIONS:-} -e JAVA_OPTS=-Dlog.level=error --rm --workdir $PWD"
-IMAGE="openapitools/openapi-generator-cli:${OPENAPI_GENERATOR_VERSION:-v4.3.1}"
+IMAGE="openapitools/openapi-generator-cli:v${OPENAPIGENERATORCLI_VERSION:-4.3.1}"
 
 # Only allocate tty if we detect one
 if [ -t 1 ]; then

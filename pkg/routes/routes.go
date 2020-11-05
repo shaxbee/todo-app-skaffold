@@ -42,7 +42,7 @@ func JSONRequestBody(req *http.Request, dst interface{}) error {
 // JSONResponseBody sets content-type to application/json and marshals src
 // as json to response body
 // 500 Internal Server Error is returned if src could not be marshaled
-func JSONResponseBody(w http.ResponseWriter, src interface{}) error {
+func JSONResponseBody(w http.ResponseWriter, status int, src interface{}) error {
 	if w.Header().Get("Content-Type") == "" {
 		w.Header().Set("Content-Type", "application/json")
 	}
@@ -56,6 +56,7 @@ func JSONResponseBody(w http.ResponseWriter, src interface{}) error {
 		)
 	}
 
+	w.WriteHeader(status)
 	_, _ = w.Write(data)
 
 	return nil

@@ -29,6 +29,7 @@ func (s *TodoServer) RegisterRoutes(router *httprouter.Router, errorMiddleware h
 	router.Handler(http.MethodGet, "/api/v1/todo/:id", errorMiddleware(s.Get))
 	router.Handler(http.MethodGet, "/api/v1/todo", errorMiddleware(s.List))
 	router.Handler(http.MethodPost, "/api/v1/todo", errorMiddleware(s.Create))
+	router.Handler(http.MethodDelete, "/api/v1/todo", errorMiddleware(s.DeleteAll))
 }
 
 func (s *TodoServer) Get(w http.ResponseWriter, req *http.Request) error {
@@ -48,7 +49,7 @@ func (s *TodoServer) Get(w http.ResponseWriter, req *http.Request) error {
 		return fmt.Errorf("failed to get todo: %w", err)
 	}
 
-	return routes.JSONResponseBody(w, api.Todo{
+	return routes.JSONResponseBody(w, http.StatusOK, api.Todo{
 		Id:      t.ID,
 		Title:   t.Title,
 		Content: t.Content,
@@ -72,7 +73,7 @@ func (s *TodoServer) List(w http.ResponseWriter, req *http.Request) error {
 		}
 	}
 
-	return routes.JSONResponseBody(w, resTodos)
+	return routes.JSONResponseBody(w, http.StatusOK, resTodos)
 }
 
 func (s *TodoServer) Create(w http.ResponseWriter, req *http.Request) error {
@@ -97,7 +98,17 @@ func (s *TodoServer) Create(w http.ResponseWriter, req *http.Request) error {
 		return fmt.Errorf("failed to create todo: %w", err)
 	}
 
-	return routes.JSONResponseBody(w, api.CreateTodoResponse{
+	return routes.JSONResponseBody(w, http.StatusCreated, api.CreateTodoResponse{
 		Id: id,
 	})
+}
+
+func (s *TodoServer) DeleteAll(w http.ResponseWriter, req *http.Request) error {
+	if err := s.queries.DeleteAll(req.Context()); err != nil {
+		return fmt.Errorf("failed to delete all todos: %w", err)
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+
+	return nil
 }

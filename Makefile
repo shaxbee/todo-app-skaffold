@@ -21,7 +21,7 @@ KUBERNETES_CONTEXT := kind-$(KIND_CLUSTER_NAME)
 
 bullet := $(shell printf "\033[34;1m▶\033[0m")
 
-all: generate lint test
+all: generate lint test-coverage test-integration build
 
 $(SQLC): ; $(info $(bullet) Installing <sqlc>)
 	@mkdir -p bin
@@ -62,7 +62,15 @@ generate-openapi: $(SQLC) ; $(info $(bullet) Generating <openapi>)
 		--generator-name go-experimental \
 		--package-name=api \
 		--additional-properties withGoCodegenComment \
-		--import-mappings=uuid.UUID=github.com/google/uuid --type-mappings=UUID=uuid.UUID \
+		--import-mappings=uuid.UUID=github.com/google/uuid --type-mappings=UUID=uuid.UUID
+
+build-goose:
+	go build -o bin/goose ./cmd/goose
+
+build-todo-service:
+	go build -o bin/todo-service ./services/todo
+
+build: build-goose build-todo-service
 
 lint: $(GOLANGCILINT) ; $(info $(bullet) Running linter)
 	$(GOLANGCILINT) run ./...
@@ -73,14 +81,17 @@ test: ; $(info $(bullet) Running tests)
 test-coverage: ; $(info $(bullet) Running tests with coverage)
 	go test -cover ./...
 
-bootstrap-kind: $(KIND); $(info $(bullet) Bootstrap <kind>)
+test-integration: ; $(info $(bullet) Running integration tests)
+	go test -tags integration ./...
+
+bootstrap-kind: $(KIND); $(info $(bullet) Bootstraping <kind>)
 	$(KIND) get clusters | grep -q $(KIND_CLUSTER_NAME) || \
 	$(KIND) create cluster \
 		--name $(KIND_CLUSTER_NAME) \
 		--image kindest/node:v$(KUBERNETES_VERSION) \
 		--wait 1m
 
-bootstrap-deploy: $(SKAFFOLD); $(info $(bullet) Bootstrap <deploy>)
+bootstrap-deploy: $(SKAFFOLD); $(info $(bullet) Bootstraping <deploy>)
 	$(SKAFFOLD) build -q | $(SKAFFOLD) deploy -p bootstrap --kube-context=$(KUBERNETES_CONTEXT) --build-artifacts -
 
 bootstrap: $(KIND) $(SKAFFOLD) bootstrap-kind bootstrap-deploy

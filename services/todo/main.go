@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/shaxbee/todo-app-skaffold/services/todo/server"
+
 	_ "github.com/lib/pq"
 )
 
@@ -24,16 +26,13 @@ func main() {
 		}
 	}()
 
-	config, err := parseConfig()
+	config, err := server.ParseConfig()
 	if err != nil {
 		log.Fatalf("failed to parse config: %v", err)
 	}
 
-	container := &container{
-		config: config,
-	}
-
-	if err := container.Run(ctx); err != nil {
+	container := server.NewContainer(config)
+	if err := container.Run(ctx).Wait(); err != nil {
 		log.Fatal(err)
 	}
 }
