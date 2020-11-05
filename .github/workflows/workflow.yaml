@@ -18,6 +18,15 @@ jobs:
         uses: actions/setup-go@v1
         with:
           go-version: ${{ matrix.go }}
+      - name: Setup cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            bin/
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum', 'Makefile') }}
+      - name: Download dependencies
+        run: go mod download
       - name: Lint
         run: make lint
       - name: Unit test with coverage
