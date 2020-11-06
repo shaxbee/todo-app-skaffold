@@ -28,30 +28,36 @@ bullet := $(shell printf "\033[34;1m▶\033[0m")
 
 all: generate format lint test-coverage integration-test build
 
-$(GOBIN): ; $(info $(bullet) Installing <gobin>)
+$(GOBIN):
+	$(info $(bullet) Installing <gobin>)
 	@mkdir -p bin
 	curl -sSfL https://github.com/myitcv/gobin/releases/download/v$(GOBIN_VERSION)/$(OS)-amd64 -o $(GOBIN)
 	chmod u+x $(GOBIN)
 
-$(GOLANGCILINT): $(GOBIN) ; $(info $(bullet) Installing <golangci-lint>)
+$(GOLANGCILINT): $(GOBIN)
+	$(info $(bullet) Installing <golangci-lint>)
 	@mkdir -p bin
 	GOBIN=bin $(GOBIN) github.com/golangci/golangci-lint/cmd/golangci-lint@v$(GOLANGCILINT_VERSION)
 
-$(GOFUMPT): $(GOBIN) ; $(info $(bullet) Installing <gofumpt>)
+$(GOFUMPT): $(GOBIN)
+	$(info $(bullet) Installing <gofumpt>)
 	@mkdir -p bin
 	GOBIN=bin $(GOBIN) mvdan.cc/gofumpt
 
-$(SQLC): ; $(info $(bullet) Installing <sqlc>)
+$(SQLC):
+	$(info $(bullet) Installing <sqlc>)
 	@mkdir -p bin
 	curl -sSfL https://github.com/kyleconroy/sqlc/releases/download/v$(SQLC_VERSION)/sqlc-v$(SQLC_VERSION)-$(OS)-amd64.tar.gz | tar -C bin -xz
 	chmod u+x $(SQLC)
 
-$(KIND): ; $(info $(bullet) Installing <kind>)
+$(KIND):
+	$(info $(bullet) Installing <kind>)
 	@mkdir -p bin
 	curl -sSfL https://kind.sigs.k8s.io/dl/v$(KIND_VERSION)/kind-$(OS)-amd64 -o $(KIND)
 	chmod u+x $(KIND)
 
-$(SKAFFOLD): ; $(info $(bullet) Installing <skaffold>)
+$(SKAFFOLD):
+	$(info $(bullet) Installing <skaffold>)
 	@mkdir -p bin
 	curl -sSfL https://storage.googleapis.com/skaffold/releases/v$(SKAFFOLD_VERSION)/skaffold-$(OS)-amd64 -o $(SKAFFOLD)
 	chmod u+x $(SKAFFOLD)
@@ -61,18 +67,23 @@ help: ## Help
 
 clean: clean-kind clean-bin ## Clean targets
 
-clean-bin: ; $(info $(bullet) Cleaning <bin>) ## Clean installed tools
+clean-bin: ## Clean installed tools
+	$(info $(bullet) Cleaning <bin>)
 	rm -rf bin/
 
-clean-kind: $(KIND) ; $(info $(bullet) Cleaning <kind>) ## Delete cluster
-	$(KIND) delete cluster --name $(KIND_CLUSTER_NAME) || exit 0
+clean-kind: # Delete cluster
+	$(info $(bullet) Cleaning <kind>)
+	test ! -f $(KIND) || \
+	$(KIND) delete cluster --name $(KIND_CLUSTER_NAME)
 
 generate: generate-sqlc generate-openapi ## Generate code
 
-generate-sqlc: $(SQLC) ; $(info $(bullet) Generating <sqlc>) ## Generate SQLC code
+generate-sqlc: $(SQLC) ## Generate SQLC code
+	$(info $(bullet) Generating <sqlc>)
 	$(SQLC) generate
 
-generate-openapi: $(SQLC) ; $(info $(bullet) Generating <openapi>) ## Generate OpenAPI code
+generate-openapi: $(SQLC) ## Generate OpenAPI code
+	$(info $(bullet) Generating <openapi>)
 	OPENAPIGENERATORCLI_VERSION=$(OPENAPIGENERATORCLI_VERSION) $(OPENAPIGENERATORCLI) generate \
 		--input-spec api/api.yaml \
 		--output pkg/api \
@@ -81,37 +92,51 @@ generate-openapi: $(SQLC) ; $(info $(bullet) Generating <openapi>) ## Generate O
 		--additional-properties withGoCodegenComment \
 		--import-mappings=uuid.UUID=github.com/google/uuid --type-mappings=UUID=uuid.UUID
 
-format: $(GOFUMPT) ; $(info $(bullet) Formatting code) ## Format code
+format: $(GOFUMPT) ## Format code
+	$(info $(bullet) Formatting code)
 	$(GOFUMPT) -w .
 
-lint: $(GOLANGCILINT) ; $(info $(bullet) Running linter) ## Lint code
+check-dirty: ## Check for uncommited changes
+	$(info $(bullet) Checking for uncommited changes)
+	git status --porcelain
+	git diff --quiet --exit-code
+
+lint: $(GOLANGCILINT) ## Lint code
+	$(info $(bullet) Running linter) 
 	$(GOLANGCILINT) run ./...
 
-test: ; $(info $(bullet) Running tests) ## Run tests
+test: ## Run tests
+	$(info $(bullet) Running tests)
 	go test ./...
 
-test-coverage: ; $(info $(bullet) Running tests with coverage) ## Run tests with coverage
+test-coverage: ## Run tests with coverage
+	$(info $(bullet) Running tests with coverage) 
 	go test -cover ./...
 
-integration-test: ; $(info $(bullet) Running integration tests) ## Run integration tests
+integration-test: ## Run integration tests
+	$(info $(bullet) Running integration tests) 
 	go test -tags integration -count 1 ./...
 
 build-goose: ## Build goose
+	$(info $(bullet) Building <goose>) 
 	go build -o bin/goose ./cmd/goose
 
 build-todo-service: ## Build todo-service
+	$(info $(bullet) Building <todo-service>) 
 	go build -o bin/todo-service ./services/todo
 
 build: build-goose build-todo-service ## Build all targets
 
-bootstrap-kind: $(KIND); $(info $(bullet) Bootstraping <kind>) ## Bootstrap cluster in docker
+bootstrap-kind: $(KIND) ## Bootstrap cluster in docker
+	$(info $(bullet) Bootstraping <kind>)
 	$(KIND) get clusters | grep -q $(KIND_CLUSTER_NAME) || \
 	$(KIND) create cluster \
 		--name $(KIND_CLUSTER_NAME) \
 		--image kindest/node:v$(KUBERNETES_VERSION) \
 		--wait 1m
 
-bootstrap-deploy: $(SKAFFOLD); $(info $(bullet) Bootstraping <deploy>) ## Bootstrap infrastructure
+bootstrap-deploy: $(SKAFFOLD) ## Bootstrap infrastructure
+	$(info $(bullet) Bootstraping <deploy>)
 	$(SKAFFOLD) build -q | $(SKAFFOLD) deploy -p bootstrap --kube-context=$(KUBERNETES_CONTEXT) --build-artifacts -
 
 bootstrap: $(KIND) $(SKAFFOLD) bootstrap-kind bootstrap-deploy ## Bootstrap cluster with infrastructure
