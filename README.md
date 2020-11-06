@@ -1,5 +1,7 @@
 # Skaffold Todo App
 
+![Skaffold Todo App](https://github.com/shaxbee/todo-app-skaffold/workflows/Skaffold%20Todo%20App/badge.svg)
+
 Todo App built in Go with [Skaffold](https://github.com/GoogleContainerTools/skaffold) deployment.
 
 ## Features
