@@ -8,8 +8,9 @@ type Error struct {
 	Cause   error
 }
 
-func New(code int, opts ...errorOpt) Error {
+func New(code int, opts ...ErrorOpt) Error {
 	err := Error{Code: code}
+
 	for _, opt := range opts {
 		opt(&err)
 	}
@@ -29,15 +30,15 @@ func (e Error) Error() string {
 	return e.Message
 }
 
-type errorOpt func(*Error)
+type ErrorOpt func(*Error)
 
-func Message(message string) errorOpt {
+func Message(message string) ErrorOpt {
 	return func(e *Error) {
 		e.Message = message
 	}
 }
 
-func Cause(cause error) errorOpt {
+func Cause(cause error) ErrorOpt {
 	return func(e *Error) {
 		e.Cause = cause
 	}

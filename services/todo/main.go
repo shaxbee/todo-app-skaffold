@@ -17,6 +17,7 @@ func main() {
 
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
+
 	go func() {
 		select {
 		case <-ctx.Done():

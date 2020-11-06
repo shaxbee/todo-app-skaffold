@@ -19,51 +19,51 @@ var defaultConfig = config{
 	user:     "postgres",
 }
 
-type configOpt func(*config)
+type ConfigOpt func(*config)
 
-func Enabled(enabled bool) configOpt {
+func Enabled(enabled bool) ConfigOpt {
 	return func(c *config) {
 		c.enabled = enabled
 	}
 }
 
-func Retain(retain bool) configOpt {
+func Retain(retain bool) ConfigOpt {
 	return func(c *config) {
 		c.retain = retain
 	}
 }
 
-func Image(image string) configOpt {
+func Image(image string) ConfigOpt {
 	return func(c *config) {
 		c.image = image
 	}
 }
 
-func DSN(dsn string) configOpt {
+func DSN(dsn string) ConfigOpt {
 	return func(c *config) {
 		c.dsn = dsn
 	}
 }
 
-func Tag(tag string) configOpt {
+func Tag(tag string) ConfigOpt {
 	return func(c *config) {
 		c.tag = tag
 	}
 }
 
-func Database(database string) configOpt {
+func Database(database string) ConfigOpt {
 	return func(c *config) {
 		c.database = database
 	}
 }
 
-func User(user string) configOpt {
+func User(user string) ConfigOpt {
 	return func(c *config) {
 		c.user = user
 	}
 }
 
-func Migration(dir string) configOpt {
+func Migration(dir string) ConfigOpt {
 	return func(c *config) {
 		c.migrations = dir
 	}

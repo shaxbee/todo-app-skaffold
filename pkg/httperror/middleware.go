@@ -10,7 +10,7 @@ import (
 type ErrorHandler func(http.ResponseWriter, *http.Request) error
 type Middleware func(handler ErrorHandler) http.Handler
 
-func NewMiddleware(opts ...configOpt) Middleware {
+func NewMiddleware(opts ...ConfigOpt) Middleware {
 	c := config{}
 
 	for _, opt := range opts {
@@ -56,9 +56,9 @@ type config struct {
 	verbose bool
 }
 
-type configOpt func(*config)
+type ConfigOpt func(*config)
 
-func Verbose(verbose bool) configOpt {
+func Verbose(verbose bool) ConfigOpt {
 	return func(c *config) {
 		c.verbose = verbose
 	}

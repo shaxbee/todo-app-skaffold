@@ -3,6 +3,8 @@ info:
   title: Todo API
   description: Todo API
   version: "0.1"
+servers:
+  - url: https://localhost:8080
 paths:
   /api/v1/todo/{id}:
     get:

@@ -81,7 +81,7 @@ test: ; $(info $(bullet) Running tests)
 test-coverage: ; $(info $(bullet) Running tests with coverage)
 	go test -cover ./...
 
-test-integration: ; $(info $(bullet) Running integration tests)
+integration-test: ; $(info $(bullet) Running integration tests)
 	go test -tags integration -count 1 ./...
 
 bootstrap-kind: $(KIND); $(info $(bullet) Bootstraping <kind>)

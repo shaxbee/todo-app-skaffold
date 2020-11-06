@@ -6,7 +6,7 @@ import (
 	"github.com/cenkalti/backoff"
 )
 
-func Open(driver string, dsn string, opts ...configOpt) (*sql.DB, error) {
+func Open(driver, dsn string, opts ...ConfigOpt) (*sql.DB, error) {
 	c := defaultConfig
 
 	for _, opt := range opts {

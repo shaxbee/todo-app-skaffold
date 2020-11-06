@@ -28,7 +28,7 @@ type Container struct {
 	}
 }
 
-func NewContainer(config *Config, opts ...containerOpt) *Container {
+func NewContainer(config *Config, opts ...ContainerOpt) *Container {
 	c := Container{
 		config: config,
 	}
@@ -134,9 +134,9 @@ func (c *Container) Run(ctx context.Context) *errgroup.Group {
 	return errg
 }
 
-type containerOpt func(c *Container)
+type ContainerOpt func(c *Container)
 
-func ContainerDB(db *sql.DB) containerOpt {
+func ContainerDB(db *sql.DB) ContainerOpt {
 	return func(c *Container) {
 		c.db = db
 	}

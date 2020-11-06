@@ -20,7 +20,7 @@ type Config struct {
 	} `json:"db" envconfig:"DB"`
 }
 
-func ParseConfig(opts ...configOpt) (*Config, error) {
+func ParseConfig(opts ...ConfigOpt) (*Config, error) {
 	var c Config
 
 	if err := envconfig.Process("TODO", &c); err != nil {
@@ -34,9 +34,9 @@ func ParseConfig(opts ...configOpt) (*Config, error) {
 	return &c, nil
 }
 
-type configOpt func(*Config)
+type ConfigOpt func(*Config)
 
-func Addr(addr string) configOpt {
+func ConfigAddr(addr string) ConfigOpt {
 	return func(c *Config) {
 		c.Server.Addr = addr
 	}

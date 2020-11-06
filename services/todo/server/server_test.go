@@ -19,28 +19,26 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func TestMain(m *testing.M) {
-	enabled := os.Getenv("PGHOST") == "" && os.Getenv("PGPORT") == ""
-
-	dbtest.TestMain(
-		m,
-		dbtest.Migration("../migrations"),
-		dbtest.Enabled(enabled),
-	)
-}
-
 func TestAPI(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	// parse config overriding address to random localhost port
-	config, err := server.ParseConfig(server.Addr("127.0.0.1:0"))
+	config, err := server.ParseConfig(server.ConfigAddr("127.0.0.1:0"))
 	if err != nil {
 		t.Fatalf("failed to parse config: %v", err)
 	}
 
+	enabled := os.Getenv("PGHOST") == "" && os.Getenv("PGPORT") == ""
+
+	db := dbtest.Postgres(
+		t,
+		dbtest.Migration("../migrations"),
+		dbtest.Enabled(enabled),
+	)
+
 	// setup server container
-	container := server.NewContainer(config, server.ContainerDB(dbtest.DB()))
+	container := server.NewContainer(config, server.ContainerDB(db))
 
 	errg := container.Run(ctx)
 	addr := container.Listener().Addr().String()

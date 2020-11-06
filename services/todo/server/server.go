@@ -19,7 +19,7 @@ type TodoServer struct {
 	queries *model.Queries
 }
 
-func New(db *sql.DB) *TodoServer {
+func New(db model.DBTX) *TodoServer {
 	return &TodoServer{
 		queries: model.New(db),
 	}
@@ -35,13 +35,15 @@ func (s *TodoServer) RegisterRoutes(router *httprouter.Router, errorMiddleware h
 func (s *TodoServer) Get(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
-	rawId := httprouter.ParamsFromContext(ctx).ByName("id")
-	id, err := uuid.Parse(rawId)
+	rawID := httprouter.ParamsFromContext(ctx).ByName("id")
+
+	id, err := uuid.Parse(rawID)
 	if err != nil {
 		return httperror.New(http.StatusBadRequest, httperror.Message("invalid id"), httperror.Cause(err))
 	}
 
 	t, err := s.queries.Get(ctx, id)
+
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return httperror.New(http.StatusNotFound, httperror.Message("todo not found"))

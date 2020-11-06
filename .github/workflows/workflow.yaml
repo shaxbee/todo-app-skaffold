@@ -32,4 +32,4 @@ jobs:
       - name: Unit test with coverage
         run: make test-coverage
       - name: Integration test
-        run: make test-integration
+        run: make integration-test

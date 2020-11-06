@@ -28,27 +28,27 @@ var defaultConfig = config{
 	MaxOpenConns:   0,
 }
 
-type configOpt func(*config)
+type ConfigOpt func(*config)
 
-func MaxInterval(interval time.Duration) configOpt {
+func MaxInterval(interval time.Duration) ConfigOpt {
 	return func(c *config) {
 		c.MaxInterval = interval
 	}
 }
 
-func MaxElapsedTime(elapsedTime time.Duration) configOpt {
+func MaxElapsedTime(elapsedTime time.Duration) ConfigOpt {
 	return func(c *config) {
 		c.MaxElapsedTime = elapsedTime
 	}
 }
 
-func MaxIdleConns(idleConns int) configOpt {
+func MaxIdleConns(idleConns int) ConfigOpt {
 	return func(c *config) {
 		c.MaxIdleConns = idleConns
 	}
 }
 
-func MaxOpenConns(openConns int) configOpt {
+func MaxOpenConns(openConns int) ConfigOpt {
 	return func(c *config) {
 		c.MaxOpenConns = openConns
 	}

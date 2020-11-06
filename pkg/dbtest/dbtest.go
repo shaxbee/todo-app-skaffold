@@ -3,8 +3,6 @@ package dbtest
 import (
 	"database/sql"
 	"fmt"
-	"log"
-	"os"
 	"testing"
 	"time"
 
@@ -13,28 +11,26 @@ import (
 	"github.com/shaxbee/todo-app-skaffold/pkg/dbutil"
 )
 
-var db *sql.DB
+func Postgres(t *testing.T, opts ...ConfigOpt) *sql.DB {
+	t.Helper()
 
-func TestMain(m *testing.M, opts ...configOpt) {
 	c := defaultConfig
+
 	for _, opt := range opts {
 		opt(&c)
 	}
 
-	var (
-		pool     *dockertest.Pool
-		resource *dockertest.Resource
-		dsn      = c.dsn
-		err      error
-	)
+	var dsn = c.dsn
+
 	if c.enabled {
-		pool, err = dockertest.NewPool("")
+		pool, err := dockertest.NewPool("")
 		if err != nil {
-			log.Fatalf("failed to create pool: %v", err)
+			t.Fatalf("failed to create pool: %v", err)
 		}
 
 		name := containerName("postgres")
-		resource, err = pool.RunWithOptions(&dockertest.RunOptions{
+
+		resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 			Name:       name,
 			Repository: c.database,
 			Tag:        c.tag,
@@ -45,45 +41,43 @@ func TestMain(m *testing.M, opts ...configOpt) {
 			},
 		})
 		if err != nil {
-			log.Fatalf("failed to start postgres: %v", err)
+			t.Fatalf("failed to start postgres: %v", err)
 		}
 
-		log.Printf("started container %q", name)
+		t.Cleanup(func() {
+			if t.Failed() && c.retain {
+				return
+			}
+
+			if err := pool.Purge(resource); err != nil {
+				t.Errorf("failed to purge pool: %v", err)
+			}
+		})
+
+		t.Logf("started container %q", name)
 
 		dsn = fmt.Sprintf("port=%s user=%s dbname=%s sslmode=disable", resource.GetPort("5432/tcp"), c.user, c.database)
 	}
 
-	db, err = dbutil.Open(
+	db, err := dbutil.Open(
 		"postgres",
 		dsn,
 		dbutil.MaxInterval(100*time.Millisecond),
 		dbutil.MaxElapsedTime(10*time.Second),
 	)
 	if err != nil {
-		log.Fatalf("failed to open database: %v", err)
+		t.Fatalf("failed to open database: %v", err)
 	}
 
-	log.Printf("connected to database %q", dsn)
+	t.Logf("connected to database %q", dsn)
 
 	if c.migrations != "" {
-		log.Println("goose: running migrations")
+		t.Logf("goose: running migrations")
 
 		if err := goose.Up(db, c.migrations); err != nil {
-			log.Fatalf("failed to migrate: %v", err)
+			t.Fatalf("failed to migrate: %v", err)
 		}
 	}
 
-	code := m.Run()
-
-	if pool != nil && code != 0 && !c.retain {
-		if err := pool.Purge(resource); err != nil {
-			log.Fatalf("failed to purge pool: %v", err)
-		}
-	}
-
-	os.Exit(code)
-}
-
-func DB() *sql.DB {
 	return db
 }
