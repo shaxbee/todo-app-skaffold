@@ -1,6 +1,9 @@
 package httperror
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 type Error struct {
 	Code    int
@@ -35,6 +38,12 @@ type ErrorOpt func(*Error)
 func Message(message string) ErrorOpt {
 	return func(e *Error) {
 		e.Message = message
+	}
+}
+
+func Messagef(format string, a ...interface{}) ErrorOpt {
+	return func(e *Error) {
+		e.Message = fmt.Sprintf(format, a...)
 	}
 }
 

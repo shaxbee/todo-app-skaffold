@@ -28,7 +28,7 @@ jobs:
       - name: Download dependencies
         run: go mod download
       - name: Ensure code is formatted
-        run: make format && make check-dirty
+        run: make format && make git-dirty
       - name: Lint
         run: make lint
       - name: Unit test with coverage

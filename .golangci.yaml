@@ -1,11 +1,7 @@
 run:
   timeout: 2m
-  tests: false
-  skip-dirs:
-    - assets
-    - dev
-    - proto
-    - mocks
+  build-tags:
+    - integration
 
 issues:
   exclude-rules:

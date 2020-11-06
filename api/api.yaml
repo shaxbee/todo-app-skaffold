@@ -28,6 +28,23 @@ paths:
                 $ref: "#/components/schemas/Todo"
         default:
           $ref: "#/components/responses/OperationFailed"
+    delete:
+      summary: Delete todo
+      operationId: deleteTodo
+      tags:
+        - todo
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Todo was deleted
+        default:
+          $ref: "#/components/responses/OperationFailed"
   /api/v1/todo:
     get:
       summary: List todos
@@ -43,6 +60,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Todo"
+        "404":
+          $ref: "#/components/responses/NotFound"
         default:
           $ref: "#/components/responses/OperationFailed"
     post:
@@ -58,7 +77,7 @@ paths:
               $ref: "#/components/schemas/CreateTodoRequest"
       responses:
         "201":
-          description: Todo was created successfully
+          description: Todo was created
           content:
             application/json:
               schema:
@@ -77,6 +96,12 @@ paths:
           $ref: "#/components/responses/OperationFailed"
 components:
   responses:
+    NotFound:
+      description: Operation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
     OperationFailed:
       description: Operation failed
       content:

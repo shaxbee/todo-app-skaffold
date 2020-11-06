@@ -1,3 +1,5 @@
+FORMAT_FILES ?= .
+
 OS := $(shell uname -s | tr [:upper:] [:lower:])
 
 GOBIN := bin/gobin
@@ -76,6 +78,15 @@ clean-kind: # Delete cluster
 	test ! -f $(KIND) || \
 	$(KIND) delete cluster --name $(KIND_CLUSTER_NAME)
 
+git-dirty: ## Check for uncommited changes
+	$(info $(bullet) Checking for uncommited changes)
+	git status --porcelain
+	git diff --quiet --exit-code
+
+git-hooks: ## Configure git hooks
+	$(info $(bullet) Configuring git hooks)
+	git config core.hooksPath .githooks
+
 generate: generate-sqlc generate-openapi ## Generate code
 
 generate-sqlc: $(SQLC) ## Generate SQLC code
@@ -94,12 +105,7 @@ generate-openapi: $(SQLC) ## Generate OpenAPI code
 
 format: $(GOFUMPT) ## Format code
 	$(info $(bullet) Formatting code)
-	$(GOFUMPT) -w .
-
-check-dirty: ## Check for uncommited changes
-	$(info $(bullet) Checking for uncommited changes)
-	git status --porcelain
-	git diff --quiet --exit-code
+	$(GOFUMPT) -w $(FORMAT_FILES)
 
 lint: $(GOLANGCILINT) ## Lint code
 	$(info $(bullet) Running linter) 

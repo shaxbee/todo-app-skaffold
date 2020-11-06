@@ -1,2 +1,4 @@
 pkg/api/ linguist-generated=true
 service/todo/model/ linguist-generated=true
+pkg/api/.openapi-generator-ignore diff
+service/todo/model/queries.sql diff

@@ -1,0 +1,7 @@
+#!/bin/bash -e
+
+files=$(git diff --cached --name-only --diff-filter=ACMR | grep -Ei "\.go$" | tr '\n' ' ')
+if [ -n "${files}" ]; then
+    FORMAT_FILES=${files} make format
+    git add ${files}
+fi
