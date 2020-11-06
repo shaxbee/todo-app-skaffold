@@ -7,8 +7,10 @@ import (
 	"net/http"
 )
 
-type ErrorHandler func(http.ResponseWriter, *http.Request) error
-type Middleware func(handler ErrorHandler) http.Handler
+type (
+	ErrorHandler func(http.ResponseWriter, *http.Request) error
+	Middleware   func(handler ErrorHandler) http.Handler
+)
 
 func NewMiddleware(opts ...ConfigOpt) Middleware {
 	c := config{}

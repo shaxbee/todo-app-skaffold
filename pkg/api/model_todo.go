@@ -12,21 +12,22 @@ package api
 
 import (
 	"encoding/json"
+
 	"github.com/google/uuid"
 )
 
 // Todo struct for Todo
 type Todo struct {
-	Id uuid.UUID `json:"id"`
-	Title string `json:"title"`
-	Content string `json:"content"`
+	Id      uuid.UUID `json:"id"`
+	Title   string    `json:"title"`
+	Content string    `json:"content"`
 }
 
 // NewTodo instantiates a new Todo object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTodo(id uuid.UUID, title string, content string, ) *Todo {
+func NewTodo(id uuid.UUID, title string, content string) *Todo {
 	this := Todo{}
 	this.Id = id
 	this.Title = title
@@ -44,7 +45,7 @@ func NewTodoWithDefaults() *Todo {
 
 // GetId returns the Id field value
 func (o *Todo) GetId() uuid.UUID {
-	if o == nil  {
+	if o == nil {
 		var ret uuid.UUID
 		return ret
 	}
@@ -55,7 +56,7 @@ func (o *Todo) GetId() uuid.UUID {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 func (o *Todo) GetIdOk() (*uuid.UUID, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Id, true
@@ -68,7 +69,7 @@ func (o *Todo) SetId(v uuid.UUID) {
 
 // GetTitle returns the Title field value
 func (o *Todo) GetTitle() string {
-	if o == nil  {
+	if o == nil {
 		var ret string
 		return ret
 	}
@@ -79,7 +80,7 @@ func (o *Todo) GetTitle() string {
 // GetTitleOk returns a tuple with the Title field value
 // and a boolean to check if the value has been set.
 func (o *Todo) GetTitleOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Title, true
@@ -92,7 +93,7 @@ func (o *Todo) SetTitle(v string) {
 
 // GetContent returns the Content field value
 func (o *Todo) GetContent() string {
-	if o == nil  {
+	if o == nil {
 		var ret string
 		return ret
 	}
@@ -103,7 +104,7 @@ func (o *Todo) GetContent() string {
 // GetContentOk returns a tuple with the Content field value
 // and a boolean to check if the value has been set.
 func (o *Todo) GetContentOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Content, true

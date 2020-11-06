@@ -23,7 +23,7 @@ type ErrorResponse struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewErrorResponse(message string, ) *ErrorResponse {
+func NewErrorResponse(message string) *ErrorResponse {
 	this := ErrorResponse{}
 	this.Message = message
 	return &this
@@ -39,7 +39,7 @@ func NewErrorResponseWithDefaults() *ErrorResponse {
 
 // GetMessage returns the Message field value
 func (o *ErrorResponse) GetMessage() string {
-	if o == nil  {
+	if o == nil {
 		var ret string
 		return ret
 	}
@@ -50,7 +50,7 @@ func (o *ErrorResponse) GetMessage() string {
 // GetMessageOk returns a tuple with the Message field value
 // and a boolean to check if the value has been set.
 func (o *ErrorResponse) GetMessageOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Message, true

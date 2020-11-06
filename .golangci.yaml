@@ -53,7 +53,7 @@ linters:
     - goconst
     - gocritic
     - gocyclo
-    - gofmt
+    - gofumpt
     - goimports
     - golint
     - goprintffuncname
@@ -77,7 +77,6 @@ linters:
     - unused
     - varcheck
     - whitespace
-    - wsl
 
     # don't enable:
     # - funlen

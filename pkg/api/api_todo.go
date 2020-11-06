@@ -15,8 +15,9 @@ import (
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"github.com/google/uuid"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 // Linger please
@@ -28,11 +29,10 @@ var (
 type TodoApiService service
 
 type apiCreateTodoRequest struct {
-	ctx _context.Context
-	apiService *TodoApiService
+	ctx               _context.Context
+	apiService        *TodoApiService
 	createTodoRequest *CreateTodoRequest
 }
-
 
 func (r apiCreateTodoRequest) CreateTodoRequest(createTodoRequest CreateTodoRequest) apiCreateTodoRequest {
 	r.createTodoRequest = &createTodoRequest
@@ -47,7 +47,7 @@ CreateTodo Create todo
 func (a *TodoApiService) CreateTodo(ctx _context.Context) apiCreateTodoRequest {
 	return apiCreateTodoRequest{
 		apiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -75,7 +75,7 @@ func (r apiCreateTodoRequest) Execute() (CreateTodoResponse, *_nethttp.Response,
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
-	
+
 	if r.createTodoRequest == nil {
 		return localVarReturnValue, nil, reportError("createTodoRequest is required and must be specified")
 	}
@@ -120,13 +120,13 @@ func (r apiCreateTodoRequest) Execute() (CreateTodoResponse, *_nethttp.Response,
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v ErrorResponse
-			err = r.apiService.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v ErrorResponse
+		err = r.apiService.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -141,11 +141,11 @@ func (r apiCreateTodoRequest) Execute() (CreateTodoResponse, *_nethttp.Response,
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
 type apiDeleteAllTodosRequest struct {
-	ctx _context.Context
+	ctx        _context.Context
 	apiService *TodoApiService
 }
-
 
 /*
 DeleteAllTodos Delete all todos
@@ -155,7 +155,7 @@ DeleteAllTodos Delete all todos
 func (a *TodoApiService) DeleteAllTodos(ctx _context.Context) apiDeleteAllTodosRequest {
 	return apiDeleteAllTodosRequest{
 		apiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -170,7 +170,6 @@ func (r apiDeleteAllTodosRequest) Execute() (*_nethttp.Response, error) {
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		
 	)
 
 	localBasePath, err := r.apiService.client.cfg.ServerURLWithContext(r.ctx, "TodoApiService.DeleteAllTodos")
@@ -222,24 +221,24 @@ func (r apiDeleteAllTodosRequest) Execute() (*_nethttp.Response, error) {
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v ErrorResponse
-			err = r.apiService.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v ErrorResponse
+		err = r.apiService.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarHTTPResponse, newErr
 	}
 
 	return localVarHTTPResponse, nil
 }
-type apiGetTodoRequest struct {
-	ctx _context.Context
-	apiService *TodoApiService
-	id uuid.UUID
-}
 
+type apiGetTodoRequest struct {
+	ctx        _context.Context
+	apiService *TodoApiService
+	id         uuid.UUID
+}
 
 /*
 GetTodo Get todo
@@ -250,8 +249,8 @@ GetTodo Get todo
 func (a *TodoApiService) GetTodo(ctx _context.Context, id uuid.UUID) apiGetTodoRequest {
 	return apiGetTodoRequest{
 		apiService: a,
-		ctx: ctx,
-		id: id,
+		ctx:        ctx,
+		id:         id,
 	}
 }
 
@@ -275,12 +274,11 @@ func (r apiGetTodoRequest) Execute() (Todo, *_nethttp.Response, error) {
 	}
 
 	localVarPath := localBasePath + "/api/v1/todo/{id}"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(r.id, "")) , -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(parameterToString(r.id, "")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
-	
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -320,13 +318,13 @@ func (r apiGetTodoRequest) Execute() (Todo, *_nethttp.Response, error) {
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v ErrorResponse
-			err = r.apiService.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v ErrorResponse
+		err = r.apiService.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
@@ -341,11 +339,11 @@ func (r apiGetTodoRequest) Execute() (Todo, *_nethttp.Response, error) {
 
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
+
 type apiListTodosRequest struct {
-	ctx _context.Context
+	ctx        _context.Context
 	apiService *TodoApiService
 }
-
 
 /*
 ListTodos List todos
@@ -355,7 +353,7 @@ ListTodos List todos
 func (a *TodoApiService) ListTodos(ctx _context.Context) apiListTodosRequest {
 	return apiListTodosRequest{
 		apiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
@@ -422,13 +420,13 @@ func (r apiListTodosRequest) Execute() ([]Todo, *_nethttp.Response, error) {
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-			var v ErrorResponse
-			err = r.apiService.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
+		var v ErrorResponse
+		err = r.apiService.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+		if err != nil {
+			newErr.error = err.Error()
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		newErr.model = v
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 

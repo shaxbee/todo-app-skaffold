@@ -157,7 +157,6 @@ func parameterToJson(obj interface{}) (string, error) {
 	return string(jsonBuf), err
 }
 
-
 // callAPI do the request.
 func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 	if c.cfg.Debug {
@@ -166,7 +165,7 @@ func (c *APIClient) callAPI(request *http.Request) (*http.Response, error) {
 			return nil, err
 		}
 		log.Printf("\n%s\n", string(dump))
-        }
+	}
 
 	resp, err := c.cfg.HTTPClient.Do(request)
 	if err != nil {
@@ -200,7 +199,6 @@ func (c *APIClient) prepareRequest(
 	formFileName string,
 	fileName string,
 	fileBytes []byte) (localVarRequest *http.Request, err error) {
-
 	var body *bytes.Buffer
 
 	// Detect postBody type and post.

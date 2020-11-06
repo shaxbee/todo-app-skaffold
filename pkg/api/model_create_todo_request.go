@@ -16,7 +16,7 @@ import (
 
 // CreateTodoRequest struct for CreateTodoRequest
 type CreateTodoRequest struct {
-	Title string `json:"title"`
+	Title   string `json:"title"`
 	Content string `json:"content"`
 }
 
@@ -24,7 +24,7 @@ type CreateTodoRequest struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateTodoRequest(title string, content string, ) *CreateTodoRequest {
+func NewCreateTodoRequest(title string, content string) *CreateTodoRequest {
 	this := CreateTodoRequest{}
 	this.Title = title
 	this.Content = content
@@ -41,7 +41,7 @@ func NewCreateTodoRequestWithDefaults() *CreateTodoRequest {
 
 // GetTitle returns the Title field value
 func (o *CreateTodoRequest) GetTitle() string {
-	if o == nil  {
+	if o == nil {
 		var ret string
 		return ret
 	}
@@ -52,7 +52,7 @@ func (o *CreateTodoRequest) GetTitle() string {
 // GetTitleOk returns a tuple with the Title field value
 // and a boolean to check if the value has been set.
 func (o *CreateTodoRequest) GetTitleOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Title, true
@@ -65,7 +65,7 @@ func (o *CreateTodoRequest) SetTitle(v string) {
 
 // GetContent returns the Content field value
 func (o *CreateTodoRequest) GetContent() string {
-	if o == nil  {
+	if o == nil {
 		var ret string
 		return ret
 	}
@@ -76,7 +76,7 @@ func (o *CreateTodoRequest) GetContent() string {
 // GetContentOk returns a tuple with the Content field value
 // and a boolean to check if the value has been set.
 func (o *CreateTodoRequest) GetContentOk() (*string, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Content, true

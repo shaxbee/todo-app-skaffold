@@ -12,6 +12,7 @@ package api
 
 import (
 	"encoding/json"
+
 	"github.com/google/uuid"
 )
 
@@ -24,7 +25,7 @@ type CreateTodoResponse struct {
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateTodoResponse(id uuid.UUID, ) *CreateTodoResponse {
+func NewCreateTodoResponse(id uuid.UUID) *CreateTodoResponse {
 	this := CreateTodoResponse{}
 	this.Id = id
 	return &this
@@ -40,7 +41,7 @@ func NewCreateTodoResponseWithDefaults() *CreateTodoResponse {
 
 // GetId returns the Id field value
 func (o *CreateTodoResponse) GetId() uuid.UUID {
-	if o == nil  {
+	if o == nil {
 		var ret uuid.UUID
 		return ret
 	}
@@ -51,7 +52,7 @@ func (o *CreateTodoResponse) GetId() uuid.UUID {
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
 func (o *CreateTodoResponse) GetIdOk() (*uuid.UUID, bool) {
-	if o == nil  {
+	if o == nil {
 		return nil, false
 	}
 	return &o.Id, true

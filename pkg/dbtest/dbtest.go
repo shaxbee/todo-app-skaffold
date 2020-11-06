@@ -1,8 +1,10 @@
 package dbtest
 
 import (
+	"crypto/rand"
 	"database/sql"
 	"fmt"
+	"math/big"
 	"testing"
 	"time"
 
@@ -20,7 +22,7 @@ func Postgres(t *testing.T, opts ...ConfigOpt) *sql.DB {
 		opt(&c)
 	}
 
-	var dsn = c.dsn
+	dsn := c.dsn
 
 	if c.enabled {
 		pool, err := dockertest.NewPool("")
@@ -80,4 +82,9 @@ func Postgres(t *testing.T, opts ...ConfigOpt) *sql.DB {
 	}
 
 	return db
+}
+
+func containerName(driver string) string {
+	suffix, _ := rand.Int(rand.Reader, big.NewInt(100000))
+	return fmt.Sprintf("%s-%s", driver, suffix)
 }
