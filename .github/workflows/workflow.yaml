@@ -24,7 +24,7 @@ jobs:
           path: |
             ~/go/pkg/mod
             bin/
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum', 'Makefile') }}
+          key: ${{ runner.os }}-go-${{ matrix.go }}-${{ hashFiles('**/go.sum', 'Makefile') }}
       - name: Download dependencies
         run: go mod download
       - name: Lint

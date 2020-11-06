@@ -103,8 +103,6 @@ func (c *Container) Listener() net.Listener {
 func (c *Container) Run(ctx context.Context) *errgroup.Group {
 	server := c.HTTPServer()
 
-	log.Println("server created")
-
 	listener := c.Listener()
 	addr := listener.Addr()
 	log.Printf("listening at %q", addr)
@@ -117,13 +115,11 @@ func (c *Container) Run(ctx context.Context) *errgroup.Group {
 		sctx, cancel := context.WithTimeout(context.Background(), c.config.Server.ShutdownTimeout)
 		defer cancel()
 
-		log.Printf("shutdown initiated")
-
 		if err := server.Shutdown(sctx); err != nil {
 			return fmt.Errorf("failed to shutdown server: %w", err)
 		}
 
-		log.Printf("server listening at %q has shutdown", addr)
+		log.Println("server has shutdown", addr)
 		return nil
 	})
 
