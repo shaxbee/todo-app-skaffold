@@ -3,7 +3,7 @@ package dbutil
 import (
 	"database/sql"
 
-	"github.com/cenkalti/backoff"
+	"github.com/cenkalti/backoff/v3"
 )
 
 func Open(driver, dsn string, opts ...ConfigOpt) (*sql.DB, error) {

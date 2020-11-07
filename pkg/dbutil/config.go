@@ -3,7 +3,7 @@ package dbutil
 import (
 	"time"
 
-	"github.com/cenkalti/backoff"
+	"github.com/cenkalti/backoff/v3"
 )
 
 type config struct {

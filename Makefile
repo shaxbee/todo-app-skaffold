@@ -6,7 +6,7 @@ include makefiles/openapi.mk
 include makefiles/kind.mk
 include makefiles/skaffold.mk
 
-.PHONY: all help clean generate build-goose build-todo-service build bootstrap
+.PHONY: all build-todo-service
 
 all: generate build
 
