@@ -41,6 +41,10 @@ func (s *TodoServer) Create(w http.ResponseWriter, req *http.Request) error {
 		return err
 	}
 
+	if len(ctReq.Title) > 20 {
+		return httperror.New(http.StatusBadRequest, httperror.Message("title should have maximum length of 20 characters"))
+	}
+
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return fmt.Errorf("failed to generate todo id: %w", err)
@@ -116,12 +120,12 @@ func (s *TodoServer) Delete(w http.ResponseWriter, req *http.Request) error {
 		return httperror.New(http.StatusBadRequest, httperror.Message("invalid id"), httperror.Cause(err))
 	}
 
-	err = s.queries.Delete(ctx, id)
+	n, err := s.queries.Delete(ctx, id)
 	switch {
-	case errors.Is(err, sql.ErrNoRows):
-		return httperror.New(http.StatusNotFound, httperror.Messagef("todo %q not found", id))
 	case err != nil:
-		return fmt.Errorf("failed to get todo: %w", err)
+		return fmt.Errorf("failed to delete todo: %w", err)
+	case n == 0:
+		return httperror.New(http.StatusNotFound, httperror.Messagef("todo %q not found", id))
 	default:
 		w.WriteHeader(http.StatusNoContent)
 		return nil

@@ -26,6 +26,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Todo"
+        "404":
+          $ref: "#/components/responses/NotFound"
         default:
           $ref: "#/components/responses/OperationFailed"
     delete:
@@ -43,6 +45,8 @@ paths:
       responses:
         "204":
           description: Todo was deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
         default:
           $ref: "#/components/responses/OperationFailed"
   /api/v1/todo:
@@ -60,8 +64,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Todo"
-        "404":
-          $ref: "#/components/responses/NotFound"
         default:
           $ref: "#/components/responses/OperationFailed"
     post:
@@ -97,7 +99,7 @@ paths:
 components:
   responses:
     NotFound:
-      description: Operation failed
+      description: Not found
       content:
         application/json:
           schema:
@@ -128,6 +130,7 @@ components:
       properties:
         title:
           type: string
+          maxLength: 20
         content:
           type: string
       required:

@@ -4,7 +4,6 @@ package server_test
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"os"
 	"testing"
@@ -55,7 +54,7 @@ func TestAPI(t *testing.T) {
 	title := "buy milk"
 	content := "buy 2l of full fat milk"
 
-	createTodo := func(t *testing.T, title string, content string) api.CreateTodoResponse {
+	createTodo := func(t *testing.T, title string, content string) uuid.UUID {
 		//nolint:bodyclose
 		res, httpRes, err := client.TodoApi.CreateTodo(ctx).CreateTodoRequest(api.CreateTodoRequest{
 			Title:   title,
@@ -65,78 +64,67 @@ func TestAPI(t *testing.T) {
 			t.Fatalf("failed to create todo: %v", err)
 		}
 
-		assert.Equal(t, http.StatusCreated, httpRes.StatusCode, "failed to create todo")
+		assert.Equal(t, http.StatusCreated, httpRes.StatusCode, "failed to create todo: unexpected status")
 
-		return res
+		return res.Id
 	}
 
-	getTodo := func(t *testing.T, id uuid.UUID) api.Todo {
+	getTodo := func(t *testing.T, id uuid.UUID) (api.Todo, bool) {
 		//nolint:bodyclose
 		res, httpRes, err := client.TodoApi.GetTodo(ctx, id).Execute()
-		if err != nil {
-			t.Fatalf("failed to get todo %q: %v", id, err)
+		switch {
+		case err != nil && httpRes == nil:
+			t.Errorf("failed to get todo %q: %v", id, err)
+			return res, false
+		case err != nil && httpRes.StatusCode != http.StatusOK && httpRes.StatusCode != http.StatusNotFound:
+			t.Errorf("failed to get todo %q: unexpected status code %d", id, httpRes.StatusCode)
+			return res, false
+		default:
+			return res, httpRes.StatusCode == http.StatusOK
 		}
-
-		assert.Equal(t, http.StatusOK, httpRes.StatusCode, "failed to get todo")
-
-		return res
 	}
 
-	todoExists := func(t *testing.T, id uuid.UUID) bool {
+	deleteTodo := func(t *testing.T, id uuid.UUID) bool {
 		//nolint:bodyclose
-		_, httpRes, err := client.TodoApi.GetTodo(ctx, id).Execute()
-
-		var apiErr api.GenericOpenAPIError
-		if err != nil && !errors.As(err, &apiErr) {
-			t.Fatalf("failed to get todo %q: %v", id, err)
-		}
-
-		switch httpRes.StatusCode {
-		case http.StatusOK:
-			return true
-		case http.StatusNotFound:
+		httpRes, err := client.TodoApi.DeleteTodo(ctx, id).Execute()
+		switch {
+		case err != nil && httpRes == nil:
+			t.Errorf("failed to delete todo %q: %v", id, err)
+			return false
+		case err != nil && httpRes.StatusCode != http.StatusNoContent && httpRes.StatusCode != http.StatusNotFound:
+			t.Errorf("failed to delete todo %q: unexpected status code %d", id, httpRes.StatusCode)
 			return false
 		default:
-			t.Fatalf("failed to get todo %q: %v", id, err)
-			return false
+			return httpRes.StatusCode == http.StatusNoContent
 		}
-	}
-
-	deleteAllTodos := func(t *testing.T) {
-		//nolint:bodyclose
-		httpRes, err := client.TodoApi.DeleteAllTodos(ctx).Execute()
-		if err != nil {
-			t.Errorf("failed to delete all todos: %v", err)
-		}
-
-		assert.Equal(t, http.StatusNoContent, httpRes.StatusCode, "failed to delete all todos")
 	}
 
 	t.Run("create todo", func(t *testing.T) {
-		t.Cleanup(func() { deleteAllTodos(t) })
+		id := createTodo(t, title, content)
+		t.Cleanup(func() { deleteTodo(t, id) })
 
-		res := createTodo(t, title, content)
-		assert.NotZero(t, res.Id, "expected non zero id")
+		assert.NotZero(t, id, "expected non zero id")
 	})
 
 	t.Run("get todo", func(t *testing.T) {
-		t.Cleanup(func() { deleteAllTodos(t) })
+		id := createTodo(t, title, content)
+		t.Cleanup(func() { deleteTodo(t, id) })
 
-		createRes := createTodo(t, title, content)
-		todo := getTodo(t, createRes.Id)
+		todo, exists := getTodo(t, id)
 
+		assert.True(t, exists, "expected todo to exist")
 		assert.Equal(t, api.Todo{
-			Id:      createRes.Id,
-			Title:   todo.Title,
-			Content: todo.Content,
+			Id:      id,
+			Title:   title,
+			Content: content,
 		}, todo)
-		assert.False(t, todoExists(t, uuid.New()))
+
+		_, exists = getTodo(t, uuid.New())
+		assert.False(t, exists)
 	})
 
 	t.Run("list todos", func(t *testing.T) {
-		t.Cleanup(func() { deleteAllTodos(t) })
-
-		createRes := createTodo(t, title, content)
+		id := createTodo(t, title, content)
 
 		//nolint:bodyclose
 		todos, httpRes, err := client.TodoApi.ListTodos(ctx).Execute()
@@ -144,29 +132,25 @@ func TestAPI(t *testing.T) {
 			t.Fatalf("failed to list todos: %v", err)
 		}
 
-		assert.Equal(t, http.StatusOK, httpRes.StatusCode, "failed to list todos")
-		assert.Equal(t, []api.Todo{
-			{
-				Id:      createRes.Id,
-				Title:   title,
-				Content: content,
-			},
-		}, todos)
+		assert.Equal(t, http.StatusOK, httpRes.StatusCode, "failed to list todos: unexpected status")
+		assert.Contains(t, todos, api.Todo{
+			Id:      id,
+			Title:   title,
+			Content: content,
+		}, "expected todo to match")
 	})
 
 	t.Run("delete todo", func(t *testing.T) {
-		t.Cleanup(func() { deleteAllTodos(t) })
-
-		createRes := createTodo(t, title, content)
+		id := createTodo(t, title, content)
 
 		//nolint:bodyclose
-		httpRes, err := client.TodoApi.DeleteTodo(ctx, createRes.Id).Execute()
-		if err != nil {
-			t.Fatalf("failed to delete todo: %v", err)
-		}
+		assert.True(t, deleteTodo(t, id), "expected todo to be deleted")
 
-		assert.Equal(t, http.StatusNoContent, httpRes.StatusCode, "failed to delete todo")
-		assert.False(t, todoExists(t, createRes.Id))
+		_, exists := getTodo(t, id)
+		assert.False(t, exists, "expected todo to be deleted")
+
+		assert.False(t, deleteTodo(t, id), "expected previously deleted todo to be not found")
+		assert.False(t, deleteTodo(t, uuid.New()), "expected non-existent todo to be not found")
 	})
 
 	// shutdown container
