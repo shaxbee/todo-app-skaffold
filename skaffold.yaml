@@ -22,10 +22,10 @@ profiles:
       - command: dev
       - command: run
     deploy:
+      kubeContext: kind-local
       kustomize:
         paths:
           - ops/overlays/dev
-      kubeContext: kind-local
     portForward:
       - resourceType: service
         resourceName: todo
@@ -38,9 +38,3 @@ profiles:
       - resourceType: service
         resourceName: postgres
         port: 5432
-  - name: bootstrap
-    deploy:
-      kustomize:
-        paths:
-          - ops/bootstrap/overlays/dev
-      kubeContext: kind-local

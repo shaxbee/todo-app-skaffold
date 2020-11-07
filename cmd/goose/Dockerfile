@@ -1,7 +1,9 @@
 FROM golang:1.15.3 AS builder
 WORKDIR /opt/build
-COPY Makefile go.mod go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
+COPY Makefile .
+COPY makefiles makefiles
 COPY cmd/goose cmd/goose
 COPY pkg pkg
 ARG SKAFFOLD_GO_GCFLAGS
