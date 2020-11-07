@@ -104,6 +104,11 @@ func TestAPI(t *testing.T) {
 		t.Cleanup(func() { deleteTodo(t, id) })
 
 		assert.NotZero(t, id, "expected non zero id")
+
+		otherID := createTodo(t, title, content)
+		t.Cleanup(func() { deleteTodo(t, otherID) })
+
+		assert.NotEqual(t, otherID, id, "expected unique id")
 	})
 
 	t.Run("get todo", func(t *testing.T) {
@@ -143,7 +148,6 @@ func TestAPI(t *testing.T) {
 	t.Run("delete todo", func(t *testing.T) {
 		id := createTodo(t, title, content)
 
-		//nolint:bodyclose
 		assert.True(t, deleteTodo(t, id), "expected todo to be deleted")
 
 		_, exists := getTodo(t, id)

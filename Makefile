@@ -13,6 +13,7 @@ OPENAPIGENERATORCLI_VERSION ?= 4.3.1
 
 GOLANGCILINT := bin/golangci-lint
 GOLANGCILINT_VERSION ?= 1.31.0
+GOLANGCILINT_CONCURRENCY ?= 16
 
 GOFUMPT := bin/gofumpt
 
@@ -109,7 +110,7 @@ format: $(GOFUMPT) ## Format code
 
 lint: $(GOLANGCILINT) ## Lint code
 	$(info $(bullet) Running linter) 
-	$(GOLANGCILINT) run ./...
+	$(GOLANGCILINT) run --concurrency $(GOLANGCILINT_CONCURRENCY) ./...
 
 test: ## Run tests
 	$(info $(bullet) Running tests)

@@ -6,6 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-18.04
     strategy:
+      fail-fast: false
       matrix:
         go:
           - "1.15"
@@ -30,7 +31,7 @@ jobs:
       - name: Ensure code is formatted
         run: make format && make git-dirty
       - name: Lint
-        run: make lint
+        run: GOLANGCILINT_CONCURRENCY=4 make lint
       - name: Unit test with coverage
         run: make test-coverage
       - name: Integration test
