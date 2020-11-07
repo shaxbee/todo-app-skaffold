@@ -23,8 +23,6 @@ clean-skaffold: $(SKAFFOLD)
 	! kubectl config current-context 2>/dev/null || \
 	$(SKAFFOLD) delete
 
-build: build-skaffold
-
 build-skaffold: $(SKAFFOLD) ## Build artifacts with skaffold
 	$(info $(_bullet) Building artifacts with <skaffold>)
 	$(SKAFFOLD) build

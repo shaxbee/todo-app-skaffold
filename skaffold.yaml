@@ -5,11 +5,29 @@ metadata:
 build:
   artifacts:
     - image: goose
-      docker:
-        dockerfile: cmd/goose/Dockerfile
+      buildpacks:
+        builder: "gcr.io/buildpacks/builder:v1"
+        dependencies:
+          paths:
+            - pkg/**
+            - cmd/goose/**
+        env:
+          - GOOGLE_RUNTIME_VERSION=1.15.3
+          - GOOGLE_BUILDABLE=./cmd/goose
+      sync:
+        auto: true
     - image: todo
-      docker:
-        dockerfile: services/todo/Dockerfile
+      buildpacks:
+        builder: "gcr.io/buildpacks/builder:v1"
+        dependencies:
+          paths:
+            - pkg/**
+            - services/todo/**
+        env:
+          - GOOGLE_RUNTIME_VERSION=1.15.3
+          - GOOGLE_BUILDABLE=./services/todo
+      sync:
+        auto: true
     - image: redoc
       docker:
         dockerfile: api/Dockerfile

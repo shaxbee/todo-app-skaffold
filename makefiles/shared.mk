@@ -7,12 +7,26 @@ _bullet := $(shell printf "\033[34;1m▶\033[0m")
 
 .PHONY: help clean clean-bin build generate deploy git-dirty git-hooks
 
+all: deps generate format lint test build
+
 help: ## Help
 	@cat $(sort $(MAKEFILE_LIST)) | grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' | sort
 
 clean: clean-bin ## Clean targets
 
-generate:  ## Generate code
+deps: ## Download dependencies
+
+generate: ## Generate code
+
+format: ## Format code
+
+lint: ## Lint code
+
+test: ## Run tests
+
+test-coverage: ## Run tests with coverage
+
+integration-test: ## Run integration tests
 
 build: ## Build all targets
 

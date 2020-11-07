@@ -7,6 +7,7 @@ spec:
     app: todo
   ports:
     - port: 80
+      targetPort: 8080
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -26,9 +27,14 @@ spec:
       containers:
         - name: todo
           image: todo
+          env:
+            - name: ADDR
+              value: ":8080"
           envFrom:
             - secretRef:
                 name: todo-db-credentials
+          ports:
+            - containerPort: 8080
 ---
 apiVersion: batch/v1
 kind: Job
@@ -48,7 +54,6 @@ spec:
         - name: goose
           image: goose
           command:
-            - "goose"
             - "-dir"
             - "./services/todo/migrations"
             - "postgres"
