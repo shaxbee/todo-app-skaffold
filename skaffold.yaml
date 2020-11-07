@@ -6,7 +6,7 @@ build:
   artifacts:
     - image: goose
       buildpacks:
-        builder: "gcr.io/buildpacks/builder:v1"
+        builder: gcr.io/buildpacks/builder:v1
         dependencies:
           paths:
             - pkg/**
@@ -14,6 +14,7 @@ build:
         env:
           - GOOGLE_RUNTIME_VERSION=1.15.3
           - GOOGLE_BUILDABLE=./cmd/goose
+          - GOOGLE_CLEAR_SOURCE=true
       sync:
         auto: true
     - image: todo
@@ -26,6 +27,7 @@ build:
         env:
           - GOOGLE_RUNTIME_VERSION=1.15.3
           - GOOGLE_BUILDABLE=./services/todo
+          - GOOGLE_CLEAR_SOURCE=true
       sync:
         auto: true
     - image: redoc
