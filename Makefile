@@ -88,6 +88,10 @@ git-hooks: ## Configure git hooks
 	$(info $(bullet) Configuring git hooks)
 	git config core.hooksPath .githooks
 
+deps: ## Download dependencies
+	$(info $(bullet) Downloading dependencies)
+	go mod download -x
+
 generate: generate-sqlc generate-openapi ## Generate code
 
 generate-sqlc: $(SQLC) ## Generate SQLC code
