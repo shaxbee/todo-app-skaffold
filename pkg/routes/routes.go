@@ -8,7 +8,6 @@ import (
 	"mime"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -104,8 +103,11 @@ func DefaultRoutes(router *httprouter.Router, opts ...Opt) http.HandlerFunc {
 
 			header.Set("Access-Control-Allow-Origin", c.CorsOrigin)
 			header.Set("Access-Control-Allow-Methods", header.Get("Allow"))
-			header.Set("Access-Control-Allow-Headers", strings.Join(c.CorsRequestHeaders, ", "))
-			header.Set("Access-Control-Allow-Credentials", "true")
+			header.Set("Access-Control-Allow-Headers", c.CorsRequestHeaders)
+
+			if c.CorsAllowCredentials {
+				header.Set("Access-Control-Allow-Credentials", "true")
+			}
 
 			if c.CorsMaxAge != 0 {
 				header.Set("Access-Control-Max-Age", strconv.FormatInt(int64(c.CorsMaxAge.Seconds()), 10))
@@ -122,7 +124,7 @@ func DefaultRoutes(router *httprouter.Router, opts ...Opt) http.HandlerFunc {
 		header := w.Header()
 
 		header.Set("Access-Control-Allow-Origin", c.CorsOrigin)
-		header.Set("Access-Control-Allow-Headers", strings.Join(c.CorsRequestHeaders, ", "))
+		header.Set("Access-Control-Allow-Headers", c.CorsRequestHeaders)
 
 		router.ServeHTTP(w, req)
 	})

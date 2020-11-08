@@ -7,14 +7,16 @@ import (
 )
 
 type config struct {
-	MaxInterval    time.Duration
-	MaxElapsedTime time.Duration
-	MaxIdleConns   int
-	MaxOpenConns   int
+	InitialInterval time.Duration
+	MaxInterval     time.Duration
+	MaxElapsedTime  time.Duration
+	MaxIdleConns    int
+	MaxOpenConns    int
 }
 
 func (c config) ExponentialBackOff() *backoff.ExponentialBackOff {
 	bo := backoff.NewExponentialBackOff()
+	bo.InitialInterval = c.InitialInterval
 	bo.MaxInterval = c.MaxInterval
 	bo.MaxElapsedTime = c.MaxElapsedTime
 
@@ -22,13 +24,20 @@ func (c config) ExponentialBackOff() *backoff.ExponentialBackOff {
 }
 
 var defaultConfig = config{
-	MaxInterval:    5 * time.Second,
-	MaxElapsedTime: 1 * time.Minute,
-	MaxIdleConns:   2,
-	MaxOpenConns:   0,
+	InitialInterval: 100 * time.Millisecond,
+	MaxInterval:     5 * time.Second,
+	MaxElapsedTime:  1 * time.Minute,
+	MaxIdleConns:    2,
+	MaxOpenConns:    0,
 }
 
 type ConfigOpt func(*config)
+
+func InitialInterval(interval time.Duration) ConfigOpt {
+	return func(c *config) {
+		c.InitialInterval = interval
+	}
+}
 
 func MaxInterval(interval time.Duration) ConfigOpt {
 	return func(c *config) {

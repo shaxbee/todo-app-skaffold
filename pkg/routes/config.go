@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"strings"
 	"time"
 )
 
@@ -20,7 +21,13 @@ func CorsOrigin(origin string) Opt {
 
 func CorsRequestHeaders(headers []string) Opt {
 	return func(c *config) {
-		c.CorsRequestHeaders = headers
+		c.CorsRequestHeaders = strings.Join(headers, ",")
+	}
+}
+
+func CorsAllowCredentials(allowCredentials bool) Opt {
+	return func(c *config) {
+		c.CorsAllowCredentials = allowCredentials
 	}
 }
 
@@ -31,13 +38,15 @@ func CorsMaxAge(maxAge time.Duration) Opt {
 }
 
 type config struct {
-	Verbose            bool
-	CorsOrigin         string
-	CorsRequestHeaders []string
-	CorsMaxAge         time.Duration
+	Verbose              bool
+	CorsOrigin           string
+	CorsRequestHeaders   string
+	CorsAllowCredentials bool
+	CorsMaxAge           time.Duration
 }
 
 var defaultConfig = config{
-	CorsOrigin:         "*",
-	CorsRequestHeaders: []string{"*"},
+	CorsOrigin:           "*",
+	CorsRequestHeaders:   "*",
+	CorsAllowCredentials: true,
 }
