@@ -23,32 +23,42 @@ $(GOLANGCILINT): $(GOBIN)
 	@mkdir -p bin
 	GOBIN=bin $(GOBIN) github.com/golangci/golangci-lint/cmd/golangci-lint@v$(GOLANGCILINT_VERSION)
 
-.PHONY: all deps format lint test test-coverage integration-test
+.PHONY: deps-go format-go lint-go test-go test-coverage-go integration-test-go
 
-all: format lint test-coverage integration-test
+deps: deps-go
 
-deps: ## Download dependencies
+deps-go: ## Download dependencies
 	$(info $(_bullet) Downloading dependencies)
 	$(GO) mod download
 
-format: $(GOFUMPT) ## Format code
+format: format-go
+
+format-go: $(GOFUMPT) ## Format Go code
 	$(info $(_bullet) Formatting code)
 	$(GOFUMPT) -w $(FORMAT_FILES)
 
-lint: $(GOLANGCILINT) ## Lint code
-	$(info $(_bullet) Running linter) 
+lint: lint-go ## Lint Go code
+
+lint-go: $(GOLANGCILINT)
+	$(info $(_bullet) Linting <go>) 
 	$(GOLANGCILINT) run --concurrency $(GOLANGCILINT_CONCURRENCY) ./...
 
-test: ## Run tests
-	$(info $(_bullet) Running tests)
+test: test-go ## Test Go code
+
+test-go: ## Run Go tests
+	$(info $(_bullet) Running tests <go>)
 	$(GO) test ./...
+
+test-coverage: test-coverage-go
 	
-test-coverage: ## Run tests with coverage
-	$(info $(_bullet) Running tests with coverage) 
+test-coverage-go: ## Run Go tests with coverage
+	$(info $(_bullet) Running tests with coverage <go>) 
 	$(GO) test -cover ./...
 
-integration-test: ## Run integration tests
-	$(info $(_bullet) Running integration tests) 
+integration-test: integration-test-go
+
+integration-test-go: ## Run Go integration tests
+	$(info $(_bullet) Running integration tests <go>) 
 	$(GO) test -tags integration -count 1 ./...
 
 endif

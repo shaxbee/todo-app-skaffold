@@ -10,9 +10,15 @@ OPENAPI_PACKAGE_NAME ?= api
 OPENAPIGENERATORCLI := scripts/openapi-generator-cli
 OPENAPIGENERATORCLI_VERSION ?= 4.3.1
 
-.PHONY: generate generate-openapi
+.PHONY: lint-openapi generate-openapi
+
+lint: lint-openapi
+
+lint-openapi: ## List OpenAPI spec
 
 generate: generate-openapi
+	$(info $(_bullet) Linting <openapi>)
+	OPENAPIGENERATORCLI_VERSION=$(OPENAPIGENERATORCLI_VERSION) $(OPENAPIGENERATORCLI) validate --input-spec $(OPENAPI_SPEC) \
 
 generate-openapi: ## Generate OpenAPI code
 	$(info $(_bullet) Generating <openapi>)

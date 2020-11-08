@@ -1,3 +1,3 @@
-FROM redocly/redoc
+FROM swaggerapi/swagger-ui
 COPY api/api.yaml /usr/share/nginx/html/
-ENV SPEC_URL=api.yaml
+ENV SWAGGER_JSON_URL=http://localhost:9000/api.yaml PORT=80

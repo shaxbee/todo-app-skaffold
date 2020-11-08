@@ -4,15 +4,27 @@ metadata:
   name: todo-app-skaffold
 build:
   artifacts:
+    - image: todo
+      buildpacks:
+        builder: gcr.io/buildpacks/builder:v1
+        dependencies:
+          paths:
+            - pkg/**
+            - services/todo/**
+        env:
+          - GOOGLE_RUNTIME_VERSION=1.15.3
+          - GOOGLE_BUILDABLE=./services/todo
+          - GOOGLE_CLEAR_SOURCE=true
     - image: goose
       docker:
         dockerfile: cmd/goose/Dockerfile
-    - image: todo
-      docker:
-        dockerfile: services/todo/Dockerfile
-    - image: redoc
+    - image: apidoc
       docker:
         dockerfile: api/Dockerfile
+      sync:
+        manual:
+          - src: api/api.yaml
+            dest: /usr/share/nginx/html/api.yaml
 deploy:
   statusCheckDeadlineSeconds: 300
 profiles:
@@ -32,7 +44,7 @@ profiles:
         port: 80
         localPort: 8080
       - resourceType: service
-        resourceName: redoc
+        resourceName: apidoc
         port: 80
         localPort: 9000
       - resourceType: service

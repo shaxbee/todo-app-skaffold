@@ -7,6 +7,7 @@ import (
 	"log"
 	"mime"
 	"net/http"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -63,14 +64,20 @@ func JSONResponseBody(w http.ResponseWriter, status int, src interface{}) error 
 }
 
 // DefaultRoutes sets up default responses for 404 Not Found and 405 MethodNotAllowed
-func DefaultRoutes(router *httprouter.Router) {
+func DefaultRoutes(router *httprouter.Router, opts ...Opt) http.HandlerFunc {
+	c := defaultConfig
+
+	for _, opt := range opts {
+		opt(&c)
+	}
+
 	router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 
 		data, err := json.Marshal(httperror.ErrorResponse{
 			Message: http.StatusText(http.StatusNotFound),
 		})
-		if err != nil {
+		if err != nil && c.Verbose {
 			log.Println(err)
 		}
 
@@ -83,10 +90,42 @@ func DefaultRoutes(router *httprouter.Router) {
 		data, err := json.Marshal(httperror.ErrorResponse{
 			Message: http.StatusText(http.StatusMethodNotAllowed),
 		})
-		if err != nil {
+		if err != nil && c.Verbose {
 			log.Println(err)
 		}
 
 		_, _ = w.Write(data)
+	})
+
+	router.GlobalOPTIONS = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if req.Header.Get("Access-Control-Request-Method") != "" {
+			header := w.Header()
+
+			header.Set("Access-Control-Allow-Origin", c.CorsOrigin)
+			header.Set("Access-Control-Allow-Methods", header.Get("Allow"))
+			header.Set("Access-Control-Allow-Headers", c.CorsRequestHeaders)
+
+			if c.CorsAllowCredentials {
+				header.Set("Access-Control-Allow-Credentials", "true")
+			}
+
+			if c.CorsMaxAge != 0 {
+				header.Set("Access-Control-Max-Age", strconv.FormatInt(int64(c.CorsMaxAge.Seconds()), 10))
+			}
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	router.HandleOPTIONS = true
+	router.HandleMethodNotAllowed = true
+
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		header := w.Header()
+
+		header.Set("Access-Control-Allow-Origin", c.CorsOrigin)
+		header.Set("Access-Control-Allow-Headers", c.CorsRequestHeaders)
+
+		router.ServeHTTP(w, req)
 	})
 }

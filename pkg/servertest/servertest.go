@@ -4,7 +4,7 @@ import (
 	"net"
 	"testing"
 
-	"github.com/cenkalti/backoff"
+	"github.com/cenkalti/backoff/v3"
 )
 
 func WaitForServer(t *testing.T, opts ...ConfigOpt) {
