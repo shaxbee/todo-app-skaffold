@@ -7,7 +7,6 @@ import (
 	"log"
 	"mime"
 	"net/http"
-	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -109,8 +108,8 @@ func DefaultRoutes(router *httprouter.Router, opts ...Opt) http.HandlerFunc {
 				header.Set("Access-Control-Allow-Credentials", "true")
 			}
 
-			if c.CorsMaxAge != 0 {
-				header.Set("Access-Control-Max-Age", strconv.FormatInt(int64(c.CorsMaxAge.Seconds()), 10))
+			if c.CorsMaxAge != "" {
+				header.Set("Access-Control-Max-Age", c.CorsMaxAge)
 			}
 		}
 

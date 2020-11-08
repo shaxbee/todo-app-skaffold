@@ -12,6 +12,7 @@ build:
             - pkg/**
             - services/todo/**
         env:
+          - GOOGLE_RUNTIME=go
           - GOOGLE_RUNTIME_VERSION=1.15.3
           - GOOGLE_BUILDABLE=./services/todo
           - GOOGLE_CLEAR_SOURCE=true

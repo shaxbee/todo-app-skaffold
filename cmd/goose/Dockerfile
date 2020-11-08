@@ -5,7 +5,7 @@ RUN go mod download
 COPY Makefile .
 COPY makefiles makefiles
 COPY cmd/goose cmd/goose
-COPY pkg pkg
+COPY pkg/dbutil pkg/dbutil
 ARG SKAFFOLD_GO_GCFLAGS
 RUN GCFLAGS=${SKAFFOLD_GO_GCFLAGS}$ make build-goose
 

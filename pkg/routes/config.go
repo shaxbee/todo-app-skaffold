@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"strconv"
 	"strings"
 	"time"
 )
@@ -33,7 +34,7 @@ func CorsAllowCredentials(allowCredentials bool) Opt {
 
 func CorsMaxAge(maxAge time.Duration) Opt {
 	return func(c *config) {
-		c.CorsMaxAge = maxAge
+		c.CorsMaxAge = strconv.FormatInt(int64(maxAge), 10)
 	}
 }
 
@@ -42,7 +43,7 @@ type config struct {
 	CorsOrigin           string
 	CorsRequestHeaders   string
 	CorsAllowCredentials bool
-	CorsMaxAge           time.Duration
+	CorsMaxAge           string
 }
 
 var defaultConfig = config{
