@@ -25,11 +25,23 @@ $(GOLANGCILINT): $(GOBIN)
 
 .PHONY: deps-go format-go lint-go test-go test-coverage-go integration-test-go
 
+clean: clean-go
+
+clean-go: ## Clean <go>
+	$(info $(_bullet) Cleaning <go>)
+	rm -rf vendor/
+
 deps: deps-go
 
-deps-go: ## Download dependencies
-	$(info $(_bullet) Downloading dependencies)
+deps-go: ## Download Go dependencies
+	$(info $(_bullet) Downloading dependencies <go>)
 	$(GO) mod download
+
+vendor: vendor-go
+
+vendor-go: ## Vendor Go dependencies
+	$(info $(_bullet) Vendoring dependencies <go>)
+	$(GO) mod vendor
 
 format: format-go
 
@@ -37,13 +49,13 @@ format-go: $(GOFUMPT) ## Format Go code
 	$(info $(_bullet) Formatting code)
 	$(GOFUMPT) -w $(FORMAT_FILES)
 
-lint: lint-go ## Lint Go code
+lint: lint-go
 
 lint-go: $(GOLANGCILINT)
 	$(info $(_bullet) Linting <go>) 
 	$(GOLANGCILINT) run --concurrency $(GOLANGCILINT_CONCURRENCY) ./...
 
-test: test-go ## Test Go code
+test: test-go
 
 test-go: ## Run Go tests
 	$(info $(_bullet) Running tests <go>)

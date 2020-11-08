@@ -16,6 +16,8 @@ clean: clean-bin ## Clean targets
 
 deps: ## Download dependencies
 
+vendor: ## Vendor dependencies
+
 generate: ## Generate code
 
 format: ## Format code
