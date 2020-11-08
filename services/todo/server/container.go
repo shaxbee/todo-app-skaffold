@@ -14,6 +14,7 @@ import (
 
 	"github.com/shaxbee/todo-app-skaffold/pkg/dbutil"
 	"github.com/shaxbee/todo-app-skaffold/pkg/httperror"
+	"github.com/shaxbee/todo-app-skaffold/pkg/routes"
 )
 
 type Container struct {
@@ -74,14 +75,18 @@ func (c *Container) HTTPServer() *http.Server {
 		todoServer := c.TodoServer()
 
 		router := httprouter.New()
+
 		errorMiddleware := httperror.NewMiddleware(httperror.Verbose(c.config.Dev))
 		todoServer.RegisterRoutes(router, errorMiddleware)
+
+		// register default handlers for NotFound, MethodNotAllowed and CORS
+		handler := routes.DefaultRoutes(router, routes.Verbose(c.config.Dev))
 
 		c.httpServer = &http.Server{
 			Addr:         c.config.Server.Addr,
 			ReadTimeout:  c.config.Server.Timeout,
 			WriteTimeout: c.config.Server.Timeout,
-			Handler:      router,
+			Handler:      handler,
 		}
 	})
 

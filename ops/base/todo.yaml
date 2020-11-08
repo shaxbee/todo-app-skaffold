@@ -53,7 +53,8 @@ spec:
       containers:
         - name: goose
           image: goose
-          command:
+          args:
+            - "goose"
             - "-dir"
             - "./services/todo/migrations"
             - "postgres"
