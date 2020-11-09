@@ -7,11 +7,10 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/julienschmidt/httprouter"
 
 	"github.com/shaxbee/todo-app-skaffold/pkg/api"
 	"github.com/shaxbee/todo-app-skaffold/pkg/httperror"
-	"github.com/shaxbee/todo-app-skaffold/pkg/routes"
+	"github.com/shaxbee/todo-app-skaffold/pkg/httprouter"
 	"github.com/shaxbee/todo-app-skaffold/services/todo/model"
 )
 
@@ -25,19 +24,19 @@ func New(db model.DBTX) *TodoServer {
 	}
 }
 
-func (s *TodoServer) RegisterRoutes(router *httprouter.Router, errorMiddleware httperror.Middleware) {
-	router.Handler(http.MethodPost, "/api/v1/todo", errorMiddleware(s.Create))
-	router.Handler(http.MethodGet, "/api/v1/todo/:id", errorMiddleware(s.Get))
-	router.Handler(http.MethodGet, "/api/v1/todo", errorMiddleware(s.List))
-	router.Handler(http.MethodDelete, "/api/v1/todo/:id", errorMiddleware(s.Delete))
-	router.Handler(http.MethodDelete, "/api/v1/todo", errorMiddleware(s.DeleteAll))
+func (s *TodoServer) RegisterRoutes(router *httprouter.Router) {
+	router.Handler(http.MethodPost, "/api/v1/todo", s.Create)
+	router.Handler(http.MethodGet, "/api/v1/todo/:id", s.Get)
+	router.Handler(http.MethodGet, "/api/v1/todo", s.List)
+	router.Handler(http.MethodDelete, "/api/v1/todo/:id", s.Delete)
+	router.Handler(http.MethodDelete, "/api/v1/todo", s.DeleteAll)
 }
 
 func (s *TodoServer) Create(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
 	var ctReq api.CreateTodoRequest
-	if err := routes.JSONRequestBody(req, &ctReq); err != nil {
+	if err := httprouter.JSONRequest(req, &ctReq); err != nil {
 		return err
 	}
 
@@ -59,7 +58,7 @@ func (s *TodoServer) Create(w http.ResponseWriter, req *http.Request) error {
 		return fmt.Errorf("failed to create todo: %w", err)
 	}
 
-	return routes.JSONResponseBody(w, http.StatusCreated, api.CreateTodoResponse{
+	return httprouter.JSONResponse(w, http.StatusCreated, api.CreateTodoResponse{
 		Id: id,
 	})
 }
@@ -83,7 +82,7 @@ func (s *TodoServer) Get(w http.ResponseWriter, req *http.Request) error {
 		return fmt.Errorf("failed to get todo: %w", err)
 	}
 
-	return routes.JSONResponseBody(w, http.StatusOK, api.Todo{
+	return httprouter.JSONResponse(w, http.StatusOK, api.Todo{
 		Id:      t.ID,
 		Title:   t.Title,
 		Content: t.Content,
@@ -107,7 +106,7 @@ func (s *TodoServer) List(w http.ResponseWriter, req *http.Request) error {
 		}
 	}
 
-	return routes.JSONResponseBody(w, http.StatusOK, resTodos)
+	return httprouter.JSONResponse(w, http.StatusOK, resTodos)
 }
 
 func (s *TodoServer) Delete(w http.ResponseWriter, req *http.Request) error {

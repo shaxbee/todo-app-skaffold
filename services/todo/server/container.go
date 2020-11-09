@@ -9,12 +9,10 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/julienschmidt/httprouter"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/shaxbee/todo-app-skaffold/pkg/dbutil"
-	"github.com/shaxbee/todo-app-skaffold/pkg/httperror"
-	"github.com/shaxbee/todo-app-skaffold/pkg/routes"
+	"github.com/shaxbee/todo-app-skaffold/pkg/httprouter"
 )
 
 type Container struct {
@@ -74,19 +72,18 @@ func (c *Container) HTTPServer() *http.Server {
 	c.once.httpServer.Do(func() {
 		todoServer := c.TodoServer()
 
-		router := httprouter.New()
+		router := httprouter.New(
+			httprouter.Verbose(c.config.Dev),
+			httprouter.CorsEnabled(c.config.Server.CorsEnabled),
+		)
 
-		errorMiddleware := httperror.NewMiddleware(httperror.Verbose(c.config.Dev))
-		todoServer.RegisterRoutes(router, errorMiddleware)
-
-		// register default handlers for NotFound, MethodNotAllowed and CORS
-		handler := routes.DefaultRoutes(router, routes.Verbose(c.config.Dev))
+		todoServer.RegisterRoutes(router)
 
 		c.httpServer = &http.Server{
 			Addr:         c.config.Server.Addr,
 			ReadTimeout:  c.config.Server.Timeout,
 			WriteTimeout: c.config.Server.Timeout,
-			Handler:      handler,
+			Handler:      router,
 		}
 	})
 

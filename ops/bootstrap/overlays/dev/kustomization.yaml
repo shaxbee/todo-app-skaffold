@@ -3,5 +3,7 @@ kind: Kustomization
 bases:
   - ../../base
 resources:
+  - local-registry-hosting.yaml
   - metrics-server.yaml
   - postgres.yaml
+  - contour.yaml

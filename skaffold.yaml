@@ -5,6 +5,8 @@ metadata:
 build:
   artifacts:
     - image: todo
+      docker:
+        dockerfile: services/todo/Dockerfile
       buildpacks:
         builder: gcr.io/buildpacks/builder:v1
         dependencies:

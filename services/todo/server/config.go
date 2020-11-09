@@ -12,6 +12,7 @@ type Config struct {
 		Addr            string        `json:"public_addr" envconfig:"ADDR" default:":http" desc:"Server listen address"`
 		Timeout         time.Duration `json:"timeout" envconfig:"TIMEOUT" default:"5s" desc:"Operation timeout"`
 		ShutdownTimeout time.Duration `json:"shutdown_timeout" envconfig:"SHUTDOWN_TIMEOUT" default:"10s" desc:"Shutdown timeout"`
+		CorsEnabled     bool          `json:"cors_enabled" envconfig:"CORS_ENABLED" default:"false" desc:"Enable cors"`
 	} `json:"server" envconfig:"SERVER"`
 	DB struct {
 		DSN          string `json:"dsn" envconfig:"DSN" default:"" desc:"Database data source name"`

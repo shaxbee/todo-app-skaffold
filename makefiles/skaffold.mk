@@ -31,7 +31,7 @@ deploy-skaffold: $(SKAFFOLD) build-skaffold ## Deploy artifacts with Skaffold
 
 run-skaffold: $(SKAFFOLD)
 	$(info $(_bullet) Run stack with <skaffold>)	
-	$(SKAFFOLD) run --force --port-forward --tail
+	$(SKAFFOLD) run --force
 
 dev-skaffold: $(SKAFFOLD) ## Run stack in development mode with Skaffold
 	$(info $(_bullet) Run stack in development mode with <skaffold>)

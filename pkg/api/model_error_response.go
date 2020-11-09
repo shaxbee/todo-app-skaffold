@@ -17,15 +17,17 @@ import (
 // ErrorResponse struct for ErrorResponse
 type ErrorResponse struct {
 	Message string `json:"message"`
+	Debug   string `json:"debug"`
 }
 
 // NewErrorResponse instantiates a new ErrorResponse object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewErrorResponse(message string) *ErrorResponse {
+func NewErrorResponse(message string, debug string) *ErrorResponse {
 	this := ErrorResponse{}
 	this.Message = message
+	this.Debug = debug
 	return &this
 }
 
@@ -61,10 +63,37 @@ func (o *ErrorResponse) SetMessage(v string) {
 	o.Message = v
 }
 
+// GetDebug returns the Debug field value
+func (o *ErrorResponse) GetDebug() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Debug
+}
+
+// GetDebugOk returns a tuple with the Debug field value
+// and a boolean to check if the value has been set.
+func (o *ErrorResponse) GetDebugOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Debug, true
+}
+
+// SetDebug sets field value
+func (o *ErrorResponse) SetDebug(v string) {
+	o.Debug = v
+}
+
 func (o ErrorResponse) MarshalJSON() ([]byte, error) {
 	toSerialize := map[string]interface{}{}
 	if true {
 		toSerialize["message"] = o.Message
+	}
+	if true {
+		toSerialize["debug"] = o.Debug
 	}
 	return json.Marshal(toSerialize)
 }

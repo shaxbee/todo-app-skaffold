@@ -149,5 +149,8 @@ components:
       properties:
         message:
           type: string
+        debug:
+          type: string
       required:
         - message
+        - debug

@@ -24,18 +24,29 @@ clean-bin: clean-kind
 
 clean-kind: # Delete cluster
 	$(info $(_bullet) Cleaning <kind>)
-	test ! -f $(KIND) || \
+	! test -f $(KIND) || \
 	$(KIND) delete cluster --name $(KIND_CLUSTER_NAME)
+	! docker top kind-registry &>/dev/null || \
+	docker rm --force kind-registry
 
 bootstrap: bootstrap-kind
 
 bootstrap-kind: $(KIND) ## Bootstrap Kubernetes in Docker
 	$(info $(_bullet) Bootstraping <kind>)
+	docker top kind-registry &>/dev/null || \
+	docker run \
+		--detach \
+		--restart always \
+		--publish 5000:5000 \
+		--name kind-registry \
+		registry:2
 	$(KIND) get clusters | grep -q $(KIND_CLUSTER_NAME) || \
 	$(KIND) create cluster \
 		--name $(KIND_CLUSTER_NAME) \
+		--config kind.yaml \
 		--image kindest/node:v$(KUBERNETES_VERSION) \
 		--wait 1m
 	kubectl apply --context $(BOOTSTRAP_CONTEXT) -k ops/bootstrap/overlays/dev
+	docker network connect kind kind-registry &>/dev/null || true
 
 endif
