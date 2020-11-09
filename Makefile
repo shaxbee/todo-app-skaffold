@@ -6,7 +6,7 @@ include makefiles/openapi.mk
 include makefiles/kind.mk
 include makefiles/skaffold.mk
 
-.PHONY: all build-goose build-todo-service bootstrap-deployment
+.PHONY: all deploy run debug build-goose build-todo-service bootstrap-deployment
 
 build: build-goose build-todo-service
 
@@ -23,3 +23,11 @@ bootstrap: bootstrap-deployment
 bootstrap-deployment: ## Bootstrap deployment
 	$(info $(_bullet) Bootstrap <deployment>)
 	kubectl apply --context $(BOOTSTRAP_CONTEXT) -k ops/bootstrap/overlays/dev
+
+deploy: deploy-skaffold
+
+run: run-skaffold ## Run
+
+dev: dev-skaffold ## Run in development mode
+
+debug: debug-skaffold ## Run in debug mode

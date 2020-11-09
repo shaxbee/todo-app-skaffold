@@ -44,18 +44,28 @@ Bootstrap might take some time to deploy Postgres.
 Run the stack:
 
 ```sh
-make run-skaffold
+make run
 ```
 
 Skaffold will build Docker images and deploy the stack to the cluster.
 Application will run in the background.
+
+### Debug
+
+Remotely debug the stack:
+
+```sh
+make debug
+```
+
+Connect to running backend using todo-service launch configuration in VSCode.
 
 ### Develop
 
 Continously develop stack:
 
 ```sh
-make dev-skaffold
+make dev
 ```
 
 If files change the affected artifacts will be built and re-deployed automatically.

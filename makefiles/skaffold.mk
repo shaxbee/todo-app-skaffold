@@ -14,7 +14,7 @@ $(SKAFFOLD):
 
 .PHONY: clean-skaffold build-skaffold deploy-skaffold dev-skaffold
 
-clean-skaffold: $(SKAFFOLD) ## Clean Skaffold stack
+clean-skaffold: $(SKAFFOLD) ## Clean Skaffold
 	$(info $(_bullet) Cleaning <skaffold>)
 	! kubectl config current-context &>/dev/null || \
 	$(SKAFFOLD) delete
@@ -29,12 +29,16 @@ deploy-skaffold: $(SKAFFOLD) build-skaffold ## Deploy artifacts with Skaffold
 	$(info $(_bullet) Deploying with <skaffold>)
 	$(SKAFFOLD) build -q | $(SKAFFOLD) deploy --force --build-artifacts -
 
-run-skaffold: $(SKAFFOLD)
+run-skaffold: $(SKAFFOLD) ## Run with Skaffold
 	$(info $(_bullet) Run stack with <skaffold>)	
 	$(SKAFFOLD) run --force
 
-dev-skaffold: $(SKAFFOLD) ## Run stack in development mode with Skaffold
-	$(info $(_bullet) Run stack in development mode with <skaffold>)
+dev-skaffold: $(SKAFFOLD) ## Run in development mode with Skaffold
+	$(info $(_bullet) Running stack in development mode with <skaffold>)
 	$(SKAFFOLD) dev --force --port-forward
+
+debug-skaffold: $(SKAFFOLD) ## Run in debugging mode with Skaffold
+	$(info $(_bullet) Running stack in debugging mode with <skaffold>)
+	$(SKAFFOLD) debug --force --port-forward
 
 endif

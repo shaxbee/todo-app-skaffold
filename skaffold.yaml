@@ -21,10 +21,21 @@ build:
             dest: /usr/share/nginx/html/api.yaml
 deploy:
   statusCheckDeadlineSeconds: 300
+portForward:
+  - resourceType: service
+    resourceName: todo
+    port: 80
+    localPort: 8080
+  - resourceType: service
+    resourceName: apidoc
+    port: 80
+    localPort: 9000
+  - resourceType: service
+    resourceName: postgres
+    port: 5432
 profiles:
   - name: local
     activation:
-      - kubeContext: kind-local
       - command: dev
       - command: run
     patches:
@@ -36,15 +47,11 @@ profiles:
       kustomize:
         paths:
           - ops/overlays/dev
-    portForward:
-      - resourceType: service
-        resourceName: todo
-        port: 80
-        localPort: 8080
-      - resourceType: service
-        resourceName: apidoc
-        port: 80
-        localPort: 9000
-      - resourceType: service
-        resourceName: postgres
-        port: 5432
+  - name: debug
+    activation:
+      - command: debug
+    deploy:
+      kubeContext: kind-local
+      kustomize:
+        paths:
+          - ops/overlays/dev
