@@ -30,8 +30,12 @@ func New(opts ...Opt) *Router {
 
 	delegate := httprouter.New()
 	delegate.HandleMethodNotAllowed = true
-	delegate.NotFound = notFound(c)
-	delegate.MethodNotAllowed = methodNotAllowed(c)
+	delegate.NotFound = adaptHandler(c, func(http.ResponseWriter, *http.Request) error {
+		return httperror.New(http.StatusNotFound)
+	})
+	delegate.MethodNotAllowed = adaptHandler(c, func(http.ResponseWriter, *http.Request) error {
+		return httperror.New(http.StatusMethodNotAllowed)
+	})
 
 	if c.corsEnabled {
 		delegate.HandleOPTIONS = true
@@ -49,13 +53,24 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *Router) Handler(method, path string, handler HandlerFunc) {
-	r.delegate.HandlerFunc(method, path, r.adaptHandler(handler))
+	r.delegate.HandlerFunc(method, path, adaptHandler(r.config, handler))
 }
 
-func (r *Router) adaptHandler(handler HandlerFunc) http.HandlerFunc {
+func adaptHandler(c config, handler HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if r.config.corsEnabled {
-			r.handleCors(w)
+		if c.corsEnabled {
+			header := w.Header()
+
+			header.Set("Access-Control-Allow-Origin", c.corsOrigin)
+
+			switch {
+			case c.CorsRequestHeadersWildcard() && c.corsAllowCredentials:
+				header.Set("Access-Control-Allow-Headers", "*, Authorization")
+			case c.CorsRequestHeadersWildcard():
+				header.Set("Access-Control-Allow-Headers", "*")
+			default:
+				header.Set("Access-Control-Allow-Headers", c.corsRequestHeaders)
+			}
 		}
 
 		err := handler(w, req)
@@ -68,82 +83,29 @@ func (r *Router) adaptHandler(handler HandlerFunc) http.HandlerFunc {
 			httpErr = httperror.New(http.StatusInternalServerError, httperror.Cause(err))
 		}
 
-		r.handleError(w, httpErr)
-	})
-}
+		var debug string
+		switch {
+		case c.verbose && httpErr.Cause != nil:
+			debug = httpErr.Cause.Error()
+			log.Printf("http error %d %s: %+v", httpErr.Status, httpErr.Message, httpErr.Cause)
+		case c.verbose:
+			log.Printf("http error %d %s", httpErr.Status, httpErr.Message)
+		}
 
-func (r *Router) handleCors(w http.ResponseWriter) {
-	header := w.Header()
-
-	header.Set("Access-Control-Allow-Origin", r.config.corsOrigin)
-
-	switch {
-	case r.config.CorsRequestHeadersWildcard() && r.config.corsAllowCredentials:
-		header.Set("Access-Control-Allow-Headers", "*, Authorization")
-	case r.config.CorsRequestHeadersWildcard():
-		header.Set("Access-Control-Allow-Headers", "*")
-	default:
-		header.Set("Access-Control-Allow-Headers", r.config.corsRequestHeaders)
-	}
-}
-
-func (r *Router) handleError(w http.ResponseWriter, httpErr httperror.Error) {
-	var debug string
-	switch {
-	case r.config.verbose && httpErr.Cause != nil:
-		debug = httpErr.Cause.Error()
-		log.Printf("http error %d %s: %+v", httpErr.Code, httpErr.Message, httpErr.Cause)
-	case r.config.verbose:
-		log.Printf("http error %d %s", httpErr.Code, httpErr.Message)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(httpErr.Code)
-
-	data, err := json.Marshal(api.ErrorResponse{
-		Message: httpErr.Message,
-		Debug:   debug,
-	})
-	if err != nil {
-		log.Printf("failed to marshal error response: %v", err)
-		return
-	}
-
-	_, _ = w.Write(data)
-}
-
-func notFound(c config) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(httpErr.Status)
 
 		data, err := json.Marshal(api.ErrorResponse{
-			Message: http.StatusText(http.StatusNotFound),
+			Message: httpErr.Message,
+			Debug:   debug,
 		})
-		if err != nil && c.verbose {
-			log.Println(err)
+		if err != nil {
+			log.Printf("failed to marshal error response: %v", err)
 			return
 		}
 
 		_, _ = w.Write(data)
-	}
-}
-
-func methodNotAllowed(c config) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-
-		data, err := json.Marshal(api.ErrorResponse{
-			Message: http.StatusText(http.StatusMethodNotAllowed),
-		})
-		if err != nil && c.verbose {
-			log.Println(err)
-			return
-		}
-
-		_, _ = w.Write(data)
-	}
+	})
 }
 
 func globalOptions(c config) http.HandlerFunc {
