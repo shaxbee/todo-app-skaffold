@@ -18,7 +18,7 @@ lint-openapi: ## List OpenAPI spec
 
 generate: generate-openapi
 	$(info $(_bullet) Linting <openapi>)
-	OPENAPIGENERATORCLI_VERSION=$(OPENAPIGENERATORCLI_VERSION) $(OPENAPIGENERATORCLI) validate --input-spec $(OPENAPI_SPEC) \
+	OPENAPIGENERATORCLI_VERSION=$(OPENAPIGENERATORCLI_VERSION) $(OPENAPIGENERATORCLI) validate --input-spec $(OPENAPI_SPEC)
 
 generate-openapi: ## Generate OpenAPI code
 	$(info $(_bullet) Generating <openapi>)

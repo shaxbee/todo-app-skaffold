@@ -26,3 +26,6 @@ spec:
       containers:
         - name: apidoc
           image: apidoc
+          env:
+            - name: SWAGGER_JSON_URL
+              value: http://localhost/api.yaml

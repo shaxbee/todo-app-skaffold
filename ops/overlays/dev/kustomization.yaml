@@ -3,6 +3,7 @@ kind: Kustomization
 bases:
   - ../../base
 resources:
+  - proxy.yaml
   - apidoc.yaml
   - todo-db-credentials.yaml
 patchesStrategicMerge:

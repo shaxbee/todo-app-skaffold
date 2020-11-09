@@ -1,0 +1,18 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: root
+spec:
+  virtualhost:
+    fqdn: localhost
+  routes:
+    - services:
+        - name: apidoc
+          port: 80
+      conditions:
+        - prefix: /
+    - services:
+        - name: todo
+          port: 80
+      conditions:
+        - prefix: /api/v1/todo

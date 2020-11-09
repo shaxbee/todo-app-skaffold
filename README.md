@@ -15,6 +15,16 @@ Todo App built in Go with [Skaffold](https://github.com/GoogleContainerTools/ska
 - [Docker](https://docs.docker.com/get-docker/).
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
+## macOS
+
+Install Docker with brew:
+
+```sh
+brew cask install docker
+```
+
+Kubectl is included with Docker.
+
 ## Development
 
 ### Bootstrap
@@ -31,50 +41,38 @@ Bootstrap might take some time to deploy Postgres.
 
 ### Run
 
-Run the stack in the current terminal:
+Run the stack:
 
 ```sh
-bin/skaffold run --force --port-forward
+make run-skaffold
 ```
 
-Terminating the run will destroy all resources except Postgres.
-
 Skaffold will build Docker images and deploy the stack to the cluster.
+Application will run in the background.
 
 ### Develop
 
 Continously develop stack:
 
 ```sh
-bin/skaffold dev --force --port-forward
+make dev-skaffold
 ```
 
 If files change the affected artifacts will be built and re-deployed automatically.
 
-### Test
-
-Following ports are exposed:
+Following ports are exposed when running:
 
 - `:8080` API
 - `:9000` API Documentation
 - `:5432` Postgres
 
-Create a note:
+### Test
+
+Open http://localhost in the browser.
+API endpoints can be tested directly from Swagger UI.
 
 ```sh
-curl -s -X POST -H 'Content-Type: application/json' http://:8080/api/v1/todo -d '{"title": "Foo", "content": "Bar"}' | jq
-```
-
-Get a note:
-
-```sh
-curl -s http://:8080/api/v1/todo/:id | jq
-```
-
-List notes:
-
-```sh
-curl -s http://:8080/api/v1/todo | jq
+open http://localhost
 ```
 
 ### Cleanup
