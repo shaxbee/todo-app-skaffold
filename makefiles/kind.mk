@@ -6,8 +6,9 @@ include makefiles/shared.mk
 KIND := bin/kind
 KIND_VERSION ?= 0.9.0
 KIND_CLUSTER_NAME ?= local
+KIND_KUBERNETES_VERSION ?= 1.17.11
+KIND_HOST_PORT ?= 80
 
-KUBERNETES_VERSION ?= 1.17.11
 BOOTSTRAP_CONTEXT := kind-$(KIND_CLUSTER_NAME)
 
 $(KIND):
@@ -22,31 +23,15 @@ clean: clean-kind
 
 clean-bin: clean-kind
 
-clean-kind: # Delete cluster
+clean-kind: $(KIND) # Delete cluster
 	$(info $(_bullet) Cleaning <kind>)
-	! test -f $(KIND) || \
 	$(KIND) delete cluster --name $(KIND_CLUSTER_NAME)
-	! docker top kind-registry &>/dev/null || \
-	docker rm --force kind-registry
+	docker rm --force kind-registry &>/dev/null || exit 0
 
 bootstrap: bootstrap-kind
 
-bootstrap-kind: $(KIND) ## Bootstrap Kubernetes in Docker
+bootstrap-kind: $(KIND) ## Bootstrap cluster
 	$(info $(_bullet) Bootstraping <kind>)
-	docker top kind-registry &>/dev/null || \
-	docker run \
-		--detach \
-		--restart always \
-		--publish 5000:5000 \
-		--name kind-registry \
-		registry:2
-	$(KIND) get clusters | grep -q $(KIND_CLUSTER_NAME) || \
-	$(KIND) create cluster \
-		--name $(KIND_CLUSTER_NAME) \
-		--config kind.yaml \
-		--image kindest/node:v$(KUBERNETES_VERSION) \
-		--wait 1m
-	kubectl apply --context $(BOOTSTRAP_CONTEXT) -k ops/bootstrap/overlays/dev
-	docker network connect kind kind-registry &>/dev/null || true
+	$(env | grep KIND) scripts/bootstrap-kind
 
 endif

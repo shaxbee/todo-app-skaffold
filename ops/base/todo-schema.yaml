@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: todo-schema
+  labels:
+    app: todo
+spec:
+  ttlSecondsAfterFinished: 0
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: goose
+          image: goose
+          args:
+            - "goose"
+            - "-dir"
+            - "./services/todo/migrations"
+            - "postgres"
+            - "postgres://"
+            - "up"
+          envFrom:
+            - secretRef:
+                name: todo-db-credentials

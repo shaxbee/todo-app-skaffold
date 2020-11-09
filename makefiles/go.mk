@@ -27,7 +27,7 @@ $(GOLANGCILINT): $(GOBIN)
 
 clean: clean-go
 
-clean-go: ## Clean <go>
+clean-go: ## Clean Go
 	$(info $(_bullet) Cleaning <go>)
 	rm -rf vendor/
 

@@ -7,17 +7,8 @@ build:
     - image: todo
       docker:
         dockerfile: services/todo/Dockerfile
-      buildpacks:
-        builder: gcr.io/buildpacks/builder:v1
-        dependencies:
-          paths:
-            - pkg/**
-            - services/todo/**
-        env:
-          - GOOGLE_RUNTIME=go
-          - GOOGLE_RUNTIME_VERSION=1.15.3
-          - GOOGLE_BUILDABLE=./services/todo
-          - GOOGLE_CLEAR_SOURCE=true
+      sync:
+        infer: []
     - image: goose
       docker:
         dockerfile: cmd/goose/Dockerfile
@@ -36,6 +27,10 @@ profiles:
       - kubeContext: kind-local
       - command: dev
       - command: run
+    patches:
+      - op: replace
+        path: /build/artifacts/0/docker/dockerfile
+        value: services/todo/Dockerfile.dev
     deploy:
       kubeContext: kind-local
       kustomize:

@@ -6,9 +6,7 @@ include makefiles/openapi.mk
 include makefiles/kind.mk
 include makefiles/skaffold.mk
 
-.PHONY: all build-todo-service
-
-all: generate build
+.PHONY: all build-goose build-todo-service bootstrap-deployment
 
 build: build-goose build-todo-service
 
@@ -19,3 +17,9 @@ build-goose: ## Build goose
 build-todo-service: ## Build todo-service
 	$(info $(_bullet) Building <todo-service>) 
 	$(GO) build -o bin/todo-service ./services/todo
+
+bootstrap: bootstrap-deployment
+
+bootstrap-deployment: ## Bootstrap deployment
+	$(info $(_bullet) Bootstrap <deployment>)
+	kubectl apply --context $(BOOTSTRAP_CONTEXT) -k ops/bootstrap/overlays/dev
