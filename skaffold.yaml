@@ -15,10 +15,6 @@ build:
     - image: apidoc
       docker:
         dockerfile: api/Dockerfile
-      sync:
-        manual:
-          - src: api/api.yaml
-            dest: /usr/share/nginx/html/api.yaml
   local:
     useBuildkit: true
 deploy:
@@ -35,7 +31,6 @@ portForward:
   - resourceType: service
     resourceName: postgres
     port: 5432
-
 profiles:
   - name: local
     activation:
