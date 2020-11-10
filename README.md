@@ -29,30 +29,25 @@ Kubectl is included with Docker installation.
 
 ### Bootstrap
 
-Bootstrap Kubernetes cluster in docker:
+Setup local cluster running in Docker using [kind](https://github.com/kubernetes-sigs/kind).
+Postgres will be installed in this step to avoid recreating database on each run.
 
 ```sh
 make bootstrap
 ```
 
-This will setup local cluster running in Docker using [kind](https://github.com/kubernetes-sigs/kind).
-
-Bootstrap might take some time to deploy Postgres.
-
 ### Run
 
-Run the stack:
+Skaffold will build Docker images and deploy the stack to the cluster.
+Application will run in the background.
 
 ```sh
 make run
 ```
 
-Skaffold will build Docker images and deploy the stack to the cluster.
-Application will run in the background.
-
 ### Debug
 
-Remotely debug the stack:
+Run the backend in debugging mode.
 
 ```sh
 make debug

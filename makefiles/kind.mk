@@ -17,20 +17,25 @@ $(KIND):
 	curl -sSfL https://kind.sigs.k8s.io/dl/v$(KIND_VERSION)/kind-$(OS)-amd64 -o $(KIND)
 	chmod u+x $(KIND)
 
-.PHONY: clean clean-kind bootstrap-kind
-
 clean: clean-kind
 
 clean-bin: clean-kind
 
+bootstrap: bootstrap-kind
+
+.PHONY: clean-kind bootstrap-kind
+
+clean-kind bootstrap-kind: export KIND := $(KIND) 
+clean-kind bootstrap-kind: export KIND_CLUSTER_NAME := $(KIND_CLUSTER_NAME)
+clean-kind bootstrap-kind: export KIND_KUBERNETES_VERSION := $(KIND_KUBERNETES_VERSION)
+clean-kind bootstrap-kind: export KIND_HOST_PORT := $(KIND_HOST_PORT)
+
 clean-kind: $(KIND) # Delete cluster
 	$(info $(_bullet) Cleaning <kind>)
-	$(env | grep KIND) scripts/clean-kind
-
-bootstrap: bootstrap-kind
+	scripts/clean-kind
 
 bootstrap-kind: $(KIND) ## Bootstrap cluster
 	$(info $(_bullet) Bootstraping <kind>)
-	$(env | grep KIND) scripts/bootstrap-kind
+	scripts/bootstrap-kind
 
 endif
