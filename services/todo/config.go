@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"time"
@@ -21,24 +21,12 @@ type Config struct {
 	} `json:"db" envconfig:"DB"`
 }
 
-func ParseConfig(opts ...ConfigOpt) (*Config, error) {
+func parseConfig() (*Config, error) {
 	var c Config
 
 	if err := envconfig.Process("TODO", &c); err != nil {
 		return nil, err
 	}
 
-	for _, opt := range opts {
-		opt(&c)
-	}
-
 	return &c, nil
-}
-
-type ConfigOpt func(*Config)
-
-func ConfigAddr(addr string) ConfigOpt {
-	return func(c *Config) {
-		c.Server.Addr = addr
-	}
 }

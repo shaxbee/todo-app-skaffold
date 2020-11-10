@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"context"
@@ -13,12 +13,13 @@ import (
 
 	"github.com/shaxbee/todo-app-skaffold/pkg/dbutil"
 	"github.com/shaxbee/todo-app-skaffold/pkg/httprouter"
+	"github.com/shaxbee/todo-app-skaffold/services/todo/server"
 )
 
-type Container struct {
+type container struct {
 	config     *Config
 	db         *sql.DB
-	todoServer *TodoServer
+	todoServer *server.TodoServer
 	httpServer *http.Server
 	listener   net.Listener
 
@@ -27,19 +28,13 @@ type Container struct {
 	}
 }
 
-func NewContainer(config *Config, opts ...ContainerOpt) *Container {
-	c := Container{
+func newContainer(config *Config) *container {
+	return &container{
 		config: config,
 	}
-
-	for _, opt := range opts {
-		opt(&c)
-	}
-
-	return &c
 }
 
-func (c *Container) DB() *sql.DB {
+func (c *container) DB(ctx context.Context) *sql.DB {
 	c.once.db.Do(func() {
 		if c.db != nil {
 			return
@@ -47,6 +42,7 @@ func (c *Container) DB() *sql.DB {
 
 		var err error
 		c.db, err = dbutil.Open(
+			ctx,
 			"postgres",
 			c.config.DB.DSN,
 			dbutil.MaxIdleConns(c.config.DB.MaxIdleConns),
@@ -60,17 +56,17 @@ func (c *Container) DB() *sql.DB {
 	return c.db
 }
 
-func (c *Container) TodoServer() *TodoServer {
+func (c *container) TodoServer(ctx context.Context) *server.TodoServer {
 	c.once.todoServer.Do(func() {
-		c.todoServer = New(c.DB())
+		c.todoServer = server.New(c.DB(ctx))
 	})
 
 	return c.todoServer
 }
 
-func (c *Container) HTTPServer() *http.Server {
+func (c *container) HTTPServer(ctx context.Context) *http.Server {
 	c.once.httpServer.Do(func() {
-		todoServer := c.TodoServer()
+		todoServer := c.TodoServer(ctx)
 
 		router := httprouter.New(
 			httprouter.Verbose(c.config.Dev),
@@ -90,7 +86,7 @@ func (c *Container) HTTPServer() *http.Server {
 	return c.httpServer
 }
 
-func (c *Container) Listener() net.Listener {
+func (c *container) Listener() net.Listener {
 	c.once.listener.Do(func() {
 		var err error
 		c.listener, err = net.Listen("tcp", c.config.Server.Addr)
@@ -102,12 +98,12 @@ func (c *Container) Listener() net.Listener {
 	return c.listener
 }
 
-func (c *Container) Addr() string {
+func (c *container) Addr() string {
 	return c.listener.Addr().String()
 }
 
-func (c *Container) Run(ctx context.Context) *errgroup.Group {
-	server := c.HTTPServer()
+func (c *container) Run(ctx context.Context) *errgroup.Group {
+	httpServer := c.HTTPServer(ctx)
 
 	listener := c.Listener()
 	log.Printf("listening at %q", c.Addr())
@@ -120,7 +116,7 @@ func (c *Container) Run(ctx context.Context) *errgroup.Group {
 		sctx, cancel := context.WithTimeout(context.Background(), c.config.Server.ShutdownTimeout)
 		defer cancel()
 
-		if err := server.Shutdown(sctx); err != nil {
+		if err := httpServer.Shutdown(sctx); err != nil {
 			return fmt.Errorf("failed to shutdown server: %w", err)
 		}
 
@@ -129,7 +125,7 @@ func (c *Container) Run(ctx context.Context) *errgroup.Group {
 	})
 
 	errg.Go(func() error {
-		if err := server.Serve(listener); err != nil && err != http.ErrServerClosed {
+		if err := httpServer.Serve(listener); err != nil && err != http.ErrServerClosed {
 			return err
 		}
 
@@ -137,12 +133,4 @@ func (c *Container) Run(ctx context.Context) *errgroup.Group {
 	})
 
 	return errg
-}
-
-type ContainerOpt func(c *Container)
-
-func ContainerDB(db *sql.DB) ContainerOpt {
-	return func(c *Container) {
-		c.db = db
-	}
 }

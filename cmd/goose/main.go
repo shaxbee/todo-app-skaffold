@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -78,7 +79,7 @@ func main() {
 	default:
 	}
 
-	db, err := dbutil.Open(driver, dbstring)
+	db, err := dbutil.Open(context.Background(), driver, dbstring)
 	if err != nil {
 		log.Fatalf("-dbstring=%q: %v\n", dbstring, err)
 	}

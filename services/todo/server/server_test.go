@@ -5,12 +5,12 @@ package server_test
 import (
 	"context"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/shaxbee/todo-app-skaffold/pkg/api"
 	"github.com/shaxbee/todo-app-skaffold/pkg/dbtest"
+	"github.com/shaxbee/todo-app-skaffold/pkg/httprouter"
 	"github.com/shaxbee/todo-app-skaffold/pkg/servertest"
 	"github.com/shaxbee/todo-app-skaffold/services/todo/server"
 	"github.com/stretchr/testify/assert"
@@ -22,32 +22,19 @@ func TestAPI(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// parse config overriding address to random localhost port
-	config, err := server.ParseConfig(server.ConfigAddr("127.0.0.1:0"))
-	if err != nil {
-		t.Fatalf("failed to parse config: %v", err)
-	}
+	endpoint := servertest.Setup(t, servertest.MakeHandler(func() http.Handler {
+		router := httprouter.New(httprouter.Verbose(true))
 
-	enabled := os.Getenv("PGHOST") == "" && os.Getenv("PGPORT") == ""
+		db := dbtest.SetupPostgres(t, dbtest.Migration("../migrations"))
+		todoServer := server.New(db)
+		todoServer.RegisterRoutes(router)
 
-	db := dbtest.Postgres(
-		t,
-		dbtest.Migration("../migrations"),
-		dbtest.Enabled(enabled),
-	)
-
-	// setup server container
-	container := server.NewContainer(config, server.ContainerDB(db))
-
-	errg := container.Run(ctx)
-	addr := container.Addr()
-
-	// wait for server to be listening
-	servertest.WaitForServer(t, servertest.Addr(addr))
+		return router
+	}))
 
 	client := api.NewAPIClient(&api.Configuration{
 		Servers: []api.ServerConfiguration{{
-			URL: "http://" + addr,
+			URL: endpoint,
 		}},
 	})
 
@@ -156,11 +143,4 @@ func TestAPI(t *testing.T) {
 		assert.False(t, deleteTodo(t, id), "expected previously deleted todo to be not found")
 		assert.False(t, deleteTodo(t, uuid.New()), "expected non-existent todo to be not found")
 	})
-
-	// shutdown container
-	cancel()
-
-	if err := errg.Wait(); err != nil {
-		t.Fatalf("server error: %v", err)
-	}
 }

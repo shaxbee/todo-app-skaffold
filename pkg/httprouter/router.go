@@ -97,7 +97,7 @@ func adaptHandler(c config, handler HandlerFunc) http.HandlerFunc {
 
 		data, err := json.Marshal(api.ErrorResponse{
 			Message: httpErr.Message,
-			Debug:   debug,
+			Debug:   api.PtrString(debug),
 		})
 		if err != nil {
 			log.Printf("failed to marshal error response: %v", err)

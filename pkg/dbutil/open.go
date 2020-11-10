@@ -1,12 +1,13 @@
 package dbutil
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/cenkalti/backoff/v3"
 )
 
-func Open(driver, dsn string, opts ...ConfigOpt) (*sql.DB, error) {
+func Open(ctx context.Context, driver, dsn string, opts ...Opt) (*sql.DB, error) {
 	c := defaultConfig
 
 	for _, opt := range opts {
@@ -23,7 +24,7 @@ func Open(driver, dsn string, opts ...ConfigOpt) (*sql.DB, error) {
 		}
 
 		return db.Ping()
-	}, c.ExponentialBackOff())
+	}, c.Backoff(ctx))
 	if err != nil {
 		return nil, err
 	}

@@ -6,10 +6,9 @@ COPY cmd/goose cmd/goose
 COPY pkg/dbutil pkg/dbutil
 ARG SKAFFOLD_GO_GCFLAGS
 ENV GCFLAGS=${SKAFFOLD_GO_GCFLAGS}
-RUN go build -o goose ./cmd/goose
+RUN go build -o goose cmd/goose
 
 FROM gcr.io/distroless/base-debian10
 COPY --from=builder /opt/build/goose /bin/goose
-COPY services/todo/migrations/ ./services/todo/migrations/ 
-ENV GOTRACEBACK=single
+COPY services/todo/migrations services/todo/migrations
 CMD ["/bin/goose"]

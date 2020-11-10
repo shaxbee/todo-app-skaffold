@@ -1,57 +1,54 @@
 package servertest
 
 import (
+	"net/http"
+	"os"
 	"time"
 
 	"github.com/cenkalti/backoff/v3"
 )
 
-type config struct {
-	Addr            string
-	InitialInterval time.Duration
-	MaxElapsedTime  time.Duration
+type Opt func(*config)
+
+type MakeHandlerFunc func() http.Handler
+
+func Backoff(bo backoff.BackOff) Opt {
+	return func(c *config) {
+		c.backoff = bo
+	}
 }
 
-func makeConfig(opts ...ConfigOpt) config {
-	c := defaultConfig
+func MakeHandler(makeHandler MakeHandlerFunc) Opt {
+	return func(c *config) {
+		c.makeHandler = makeHandler
+	}
+}
 
-	for _, opt := range opts {
-		opt(&c)
+type config struct {
+	backoff     backoff.BackOff
+	makeHandler MakeHandlerFunc
+}
+
+func (c config) Endpoint() string {
+	endpoint := os.Getenv("TEST_ENDPOINT")
+	switch {
+	case endpoint != "":
+		return endpoint
+	case endpoint == "" && c.makeHandler == nil:
+		return "http://:80"
+	default:
+		return ""
+	}
+}
+
+func (c config) Backoff() backoff.BackOff {
+	if c.backoff != nil {
+		return c.backoff
 	}
 
-	return c
-}
-
-func (c config) ExponentialBackoff() *backoff.ExponentialBackOff {
 	bo := backoff.NewExponentialBackOff()
-	bo.InitialInterval = c.InitialInterval
-	bo.MaxElapsedTime = c.MaxElapsedTime
+	bo.InitialInterval = 10 * time.Millisecond
+	bo.MaxElapsedTime = 5 * time.Second
 
 	return bo
-}
-
-var defaultConfig = config{
-	Addr:            ":http",
-	InitialInterval: 10 * time.Millisecond,
-	MaxElapsedTime:  5 * time.Second,
-}
-
-type ConfigOpt func(*config)
-
-func Addr(addr string) ConfigOpt {
-	return func(c *config) {
-		c.Addr = addr
-	}
-}
-
-func InitialInterval(interval time.Duration) ConfigOpt {
-	return func(c *config) {
-		c.InitialInterval = interval
-	}
-}
-
-func MaxElapsedTime(elapsedTime time.Duration) ConfigOpt {
-	return func(c *config) {
-		c.MaxElapsedTime = elapsedTime
-	}
 }

@@ -1,9 +1,47 @@
 package dbtest
 
+import "os"
+
+type Opt func(*config)
+
+func Retain(retain bool) Opt {
+	return func(c *config) {
+		c.retain = retain
+	}
+}
+
+func Image(image string) Opt {
+	return func(c *config) {
+		c.image = image
+	}
+}
+
+func Tag(tag string) Opt {
+	return func(c *config) {
+		c.tag = tag
+	}
+}
+
+func Database(database string) Opt {
+	return func(c *config) {
+		c.database = database
+	}
+}
+
+func User(user string) Opt {
+	return func(c *config) {
+		c.user = user
+	}
+}
+
+func Migration(dir string) Opt {
+	return func(c *config) {
+		c.migrations = dir
+	}
+}
+
 type config struct {
-	enabled    bool
 	retain     bool
-	dsn        string
 	image      string
 	tag        string
 	database   string
@@ -11,60 +49,13 @@ type config struct {
 	migrations string
 }
 
+func (c *config) dsn() string {
+	return os.Getenv("TEST_DATABASE")
+}
+
 var defaultConfig = config{
-	enabled:  true,
 	image:    "postgres",
 	tag:      "13",
 	database: "postgres",
 	user:     "postgres",
-}
-
-type ConfigOpt func(*config)
-
-func Enabled(enabled bool) ConfigOpt {
-	return func(c *config) {
-		c.enabled = enabled
-	}
-}
-
-func Retain(retain bool) ConfigOpt {
-	return func(c *config) {
-		c.retain = retain
-	}
-}
-
-func Image(image string) ConfigOpt {
-	return func(c *config) {
-		c.image = image
-	}
-}
-
-func DSN(dsn string) ConfigOpt {
-	return func(c *config) {
-		c.dsn = dsn
-	}
-}
-
-func Tag(tag string) ConfigOpt {
-	return func(c *config) {
-		c.tag = tag
-	}
-}
-
-func Database(database string) ConfigOpt {
-	return func(c *config) {
-		c.database = database
-	}
-}
-
-func User(user string) ConfigOpt {
-	return func(c *config) {
-		c.user = user
-	}
-}
-
-func Migration(dir string) ConfigOpt {
-	return func(c *config) {
-		c.migrations = dir
-	}
 }

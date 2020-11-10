@@ -25,14 +25,14 @@ func New(db model.DBTX) *TodoServer {
 }
 
 func (s *TodoServer) RegisterRoutes(router *httprouter.Router) {
-	router.Handler(http.MethodPost, "/api/v1/todo", s.Create)
-	router.Handler(http.MethodGet, "/api/v1/todo/:id", s.Get)
-	router.Handler(http.MethodGet, "/api/v1/todo", s.List)
-	router.Handler(http.MethodDelete, "/api/v1/todo/:id", s.Delete)
-	router.Handler(http.MethodDelete, "/api/v1/todo", s.DeleteAll)
+	router.Handler(http.MethodPost, "/api/v1/todo", s.create)
+	router.Handler(http.MethodGet, "/api/v1/todo/:id", s.get)
+	router.Handler(http.MethodGet, "/api/v1/todo", s.list)
+	router.Handler(http.MethodDelete, "/api/v1/todo/:id", s.delete)
+	router.Handler(http.MethodDelete, "/api/v1/todo", s.deleteAll)
 }
 
-func (s *TodoServer) Create(w http.ResponseWriter, req *http.Request) error {
+func (s *TodoServer) create(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
 	var ctReq api.CreateTodoRequest
@@ -63,7 +63,7 @@ func (s *TodoServer) Create(w http.ResponseWriter, req *http.Request) error {
 	})
 }
 
-func (s *TodoServer) Get(w http.ResponseWriter, req *http.Request) error {
+func (s *TodoServer) get(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
 	rawID := httprouter.ParamsFromContext(ctx).ByName("id")
@@ -89,7 +89,7 @@ func (s *TodoServer) Get(w http.ResponseWriter, req *http.Request) error {
 	})
 }
 
-func (s *TodoServer) List(w http.ResponseWriter, req *http.Request) error {
+func (s *TodoServer) list(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
 	todos, err := s.queries.List(ctx)
@@ -109,7 +109,7 @@ func (s *TodoServer) List(w http.ResponseWriter, req *http.Request) error {
 	return httprouter.JSONResponse(w, http.StatusOK, resTodos)
 }
 
-func (s *TodoServer) Delete(w http.ResponseWriter, req *http.Request) error {
+func (s *TodoServer) delete(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
 	rawID := httprouter.ParamsFromContext(ctx).ByName("id")
@@ -131,7 +131,7 @@ func (s *TodoServer) Delete(w http.ResponseWriter, req *http.Request) error {
 	}
 }
 
-func (s *TodoServer) DeleteAll(w http.ResponseWriter, req *http.Request) error {
+func (s *TodoServer) deleteAll(w http.ResponseWriter, req *http.Request) error {
 	if err := s.queries.DeleteAll(req.Context()); err != nil {
 		return fmt.Errorf("failed to delete all todos: %w", err)
 	}

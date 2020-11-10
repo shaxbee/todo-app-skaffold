@@ -1,64 +1,52 @@
 package dbutil
 
 import (
+	"context"
 	"time"
 
 	"github.com/cenkalti/backoff/v3"
 )
 
-type config struct {
-	InitialInterval time.Duration
-	MaxInterval     time.Duration
-	MaxElapsedTime  time.Duration
-	MaxIdleConns    int
-	MaxOpenConns    int
-}
-
-func (c config) ExponentialBackOff() *backoff.ExponentialBackOff {
-	bo := backoff.NewExponentialBackOff()
-	bo.InitialInterval = c.InitialInterval
-	bo.MaxInterval = c.MaxInterval
-	bo.MaxElapsedTime = c.MaxElapsedTime
-
-	return bo
-}
-
 var defaultConfig = config{
-	InitialInterval: 100 * time.Millisecond,
-	MaxInterval:     5 * time.Second,
-	MaxElapsedTime:  1 * time.Minute,
-	MaxIdleConns:    2,
-	MaxOpenConns:    0,
+	MaxIdleConns: 2,
+	MaxOpenConns: 0,
 }
 
-type ConfigOpt func(*config)
+type Opt func(*config)
 
-func InitialInterval(interval time.Duration) ConfigOpt {
+func Backoff(bo backoff.BackOff) Opt {
 	return func(c *config) {
-		c.InitialInterval = interval
+		c.backoff = bo
 	}
 }
 
-func MaxInterval(interval time.Duration) ConfigOpt {
-	return func(c *config) {
-		c.MaxInterval = interval
-	}
-}
-
-func MaxElapsedTime(elapsedTime time.Duration) ConfigOpt {
-	return func(c *config) {
-		c.MaxElapsedTime = elapsedTime
-	}
-}
-
-func MaxIdleConns(idleConns int) ConfigOpt {
+func MaxIdleConns(idleConns int) Opt {
 	return func(c *config) {
 		c.MaxIdleConns = idleConns
 	}
 }
 
-func MaxOpenConns(openConns int) ConfigOpt {
+func MaxOpenConns(openConns int) Opt {
 	return func(c *config) {
 		c.MaxOpenConns = openConns
 	}
+}
+
+type config struct {
+	backoff      backoff.BackOff
+	MaxIdleConns int
+	MaxOpenConns int
+}
+
+func (c config) Backoff(ctx context.Context) backoff.BackOff {
+	if c.backoff != nil {
+		return backoff.WithContext(c.backoff, ctx)
+	}
+
+	bo := backoff.NewExponentialBackOff()
+	bo.InitialInterval = 100 * time.Millisecond
+	bo.MaxInterval = 5 * time.Second
+	bo.MaxElapsedTime = 1 * time.Minute
+
+	return backoff.WithContext(bo, ctx)
 }

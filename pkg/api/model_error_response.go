@@ -16,18 +16,17 @@ import (
 
 // ErrorResponse struct for ErrorResponse
 type ErrorResponse struct {
-	Message string `json:"message"`
-	Debug   string `json:"debug"`
+	Message string  `json:"message"`
+	Debug   *string `json:"debug,omitempty"`
 }
 
 // NewErrorResponse instantiates a new ErrorResponse object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewErrorResponse(message string, debug string) *ErrorResponse {
+func NewErrorResponse(message string) *ErrorResponse {
 	this := ErrorResponse{}
 	this.Message = message
-	this.Debug = debug
 	return &this
 }
 
@@ -63,28 +62,36 @@ func (o *ErrorResponse) SetMessage(v string) {
 	o.Message = v
 }
 
-// GetDebug returns the Debug field value
+// GetDebug returns the Debug field value if set, zero value otherwise.
 func (o *ErrorResponse) GetDebug() string {
-	if o == nil {
+	if o == nil || o.Debug == nil {
 		var ret string
 		return ret
 	}
-
-	return o.Debug
+	return *o.Debug
 }
 
-// GetDebugOk returns a tuple with the Debug field value
+// GetDebugOk returns a tuple with the Debug field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *ErrorResponse) GetDebugOk() (*string, bool) {
-	if o == nil {
+	if o == nil || o.Debug == nil {
 		return nil, false
 	}
-	return &o.Debug, true
+	return o.Debug, true
 }
 
-// SetDebug sets field value
+// HasDebug returns a boolean if a field has been set.
+func (o *ErrorResponse) HasDebug() bool {
+	if o != nil && o.Debug != nil {
+		return true
+	}
+
+	return false
+}
+
+// SetDebug gets a reference to the given string and assigns it to the Debug field.
 func (o *ErrorResponse) SetDebug(v string) {
-	o.Debug = v
+	o.Debug = &v
 }
 
 func (o ErrorResponse) MarshalJSON() ([]byte, error) {
@@ -92,7 +99,7 @@ func (o ErrorResponse) MarshalJSON() ([]byte, error) {
 	if true {
 		toSerialize["message"] = o.Message
 	}
-	if true {
+	if o.Debug != nil {
 		toSerialize["debug"] = o.Debug
 	}
 	return json.Marshal(toSerialize)

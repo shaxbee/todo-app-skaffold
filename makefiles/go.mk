@@ -71,6 +71,6 @@ integration-test: integration-test-go
 
 integration-test-go: ## Run Go integration tests
 	$(info $(_bullet) Running integration tests <go>) 
-	$(GO) test -tags integration -count 1 ./...
+	$(GO) test -v -tags integration -count 1 ./...
 
 endif

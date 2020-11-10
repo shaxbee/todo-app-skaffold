@@ -30,7 +30,7 @@ deploy-skaffold: $(SKAFFOLD) build-skaffold ## Deploy artifacts with Skaffold
 	$(SKAFFOLD) build -q | $(SKAFFOLD) deploy --force --build-artifacts -
 
 run-skaffold: $(SKAFFOLD) ## Run with Skaffold
-	$(info $(_bullet) Run stack with <skaffold>)	
+	$(info $(_bullet) Running stack with <skaffold>)
 	$(SKAFFOLD) run --force
 
 dev-skaffold: $(SKAFFOLD) ## Run in development mode with Skaffold
