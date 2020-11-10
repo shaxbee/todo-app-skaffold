@@ -10,6 +10,6 @@
             "port": 56268,
             "cwd": "${workspaceFolder}",
             "remotePath": "/opt/build/"
-          }
+          },
     ]
 }

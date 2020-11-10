@@ -19,6 +19,8 @@ build:
         manual:
           - src: api/api.yaml
             dest: /usr/share/nginx/html/api.yaml
+  local:
+    useBuildkit: true
 deploy:
   statusCheckDeadlineSeconds: 300
 portForward:
@@ -33,25 +35,22 @@ portForward:
   - resourceType: service
     resourceName: postgres
     port: 5432
+
 profiles:
   - name: local
     activation:
-      - command: dev
       - command: run
-    patches:
-      - op: replace
-        path: /build/artifacts/0/docker/dockerfile
-        value: services/todo/Dockerfile.dev
-    deploy:
-      kubeContext: kind-local
-      kustomize:
-        paths:
-          - ops/overlays/dev
-  - name: debug
-    activation:
+      - command: dev
       - command: debug
     deploy:
       kubeContext: kind-local
       kustomize:
         paths:
-          - ops/overlays/dev
+          - ops/overlays/local
+  - name: build-dev
+    activation:
+      - command: dev
+    patches:
+      - op: replace
+        path: /build/artifacts/0/docker/dockerfile
+        value: services/todo/Dockerfile.dev

@@ -25,8 +25,7 @@ clean-bin: clean-kind
 
 clean-kind: $(KIND) # Delete cluster
 	$(info $(_bullet) Cleaning <kind>)
-	$(KIND) delete cluster --name $(KIND_CLUSTER_NAME)
-	docker rm --force kind-registry &>/dev/null || exit 0
+	$(env | grep KIND) scripts/clean-kind
 
 bootstrap: bootstrap-kind
 

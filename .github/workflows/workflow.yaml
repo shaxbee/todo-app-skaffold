@@ -36,3 +36,5 @@ jobs:
         run: make test-coverage
       - name: Integration test
         run: make integration-test
+      - name: Build images
+        run: make build-skaffold

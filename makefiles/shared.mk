@@ -5,7 +5,7 @@ OS ?= $(shell uname -s | tr [:upper:] [:lower:])
 
 _bullet := $(shell printf "\033[34;1m▶\033[0m")
 
-.PHONY: help clean clean-bin build generate deploy git-dirty git-hooks
+.PHONY: help clean build generate deploy
 
 all: deps generate format lint test build
 
@@ -35,6 +35,14 @@ build: ## Build all targets
 bootstrap: ## Bootstrap
 
 deploy: ## Deploy
+
+run: ## Run
+
+dev: ## Run in development mode
+
+debug: ## Run in debug mode
+
+.PHONY: clean-bin git-dirty git-hooks
 
 clean-bin: ## Clean installed tools
 	$(info $(_bullet) Cleaning <bin>)

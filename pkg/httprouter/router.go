@@ -14,12 +14,14 @@ import (
 
 var ParamsFromContext = httprouter.ParamsFromContext
 
+type HandlerFunc func(w http.ResponseWriter, req *http.Request) error
+
+type Middleware func(handler HandlerFunc) HandlerFunc
+
 type Router struct {
 	config   config
 	delegate *httprouter.Router
 }
-
-type HandlerFunc func(http.ResponseWriter, *http.Request) error
 
 func New(opts ...Opt) *Router {
 	c := defaultConfig
@@ -52,7 +54,11 @@ func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	r.delegate.ServeHTTP(w, req)
 }
 
-func (r *Router) Handler(method, path string, handler HandlerFunc) {
+func (r *Router) Handler(method, path string, handler HandlerFunc, middleware ...Middleware) {
+	for _, mw := range middleware {
+		handler = mw(handler)
+	}
+
 	r.delegate.HandlerFunc(method, path, adaptHandler(r.config, handler))
 }
 

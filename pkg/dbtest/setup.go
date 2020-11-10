@@ -1,3 +1,5 @@
+// +build integration
+
 package dbtest
 
 import (
@@ -7,10 +9,9 @@ import (
 	"fmt"
 	"math/big"
 	"testing"
-	"time"
 
 	"github.com/cenkalti/backoff/v3"
-	"github.com/ory/dockertest"
+	"github.com/ory/dockertest/v3"
 	"github.com/pressly/goose"
 	"github.com/shaxbee/todo-app-skaffold/pkg/dbutil"
 )
@@ -23,8 +24,8 @@ func SetupPostgres(t testing.TB, opts ...Opt) *sql.DB {
 		opt(&c)
 	}
 
-	if dsn := c.dsn(); dsn != "" {
-		return openDB(t, dsn, c.migrations)
+	if dsn := c.DSN(); dsn != "" {
+		return openDB(t, dsn, c.migrations, c.Backoff())
 	}
 
 	pool, err := dockertest.NewPool("")
@@ -61,15 +62,10 @@ func SetupPostgres(t testing.TB, opts ...Opt) *sql.DB {
 	t.Logf("started container %q", name)
 
 	dsn := fmt.Sprintf("port=%s user=%s dbname=%s sslmode=disable", resource.GetPort("5432/tcp"), c.user, c.database)
-	return openDB(t, dsn, c.migrations)
+	return openDB(t, dsn, c.migrations, c.Backoff())
 }
 
-func openDB(t testing.TB, dsn, migrations string) *sql.DB {
-	bo := backoff.NewExponentialBackOff()
-	bo.InitialInterval = 10 * time.Millisecond
-	bo.MaxInterval = 1 * time.Second
-	bo.MaxElapsedTime = 10 * time.Second
-
+func openDB(t testing.TB, dsn, migrations string, bo backoff.BackOff) *sql.DB {
 	db, err := dbutil.Open(context.Background(), "postgres", dsn, dbutil.Backoff(bo))
 	if err != nil {
 		t.Fatalf("failed to open database: %v", err)
