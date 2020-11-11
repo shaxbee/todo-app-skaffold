@@ -2,6 +2,7 @@ ifndef _include_kind_mk
 _include_kind_mk := 1
 
 include makefiles/shared.mk
+include makefiles/kubectl.mk
 
 KIND := bin/kind
 KIND_VERSION ?= 0.9.0
@@ -34,8 +35,8 @@ clean-kind: $(KIND) # Delete cluster
 	$(info $(_bullet) Cleaning <kind>)
 	scripts/clean-kind
 
-bootstrap-kind: $(KIND) ## Bootstrap cluster
+bootstrap-kind: $(KUBECTL) $(KIND)
 	$(info $(_bullet) Bootstraping <kind>)
-	scripts/bootstrap-kind
+	PATH=bin:$(PATH) scripts/bootstrap-kind
 
 endif

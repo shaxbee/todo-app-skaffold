@@ -31,4 +31,4 @@ build-todo-service: ## Build todo-service
 
 bootstrap-deployment: ## Bootstrap deployment
 	$(info $(_bullet) Bootstraping <deployment>)
-	kubectl apply --context $(BOOTSTRAP_CONTEXT) -k ops/bootstrap/overlays/local
+	PATH=bin:$(PATH) kubectl apply --context $(BOOTSTRAP_CONTEXT) -k ops/bootstrap/overlays/local
