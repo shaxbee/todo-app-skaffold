@@ -2,10 +2,11 @@
 FROM golang:1.15.3 AS builder
 # copy source files
 WORKDIR /opt/build
-COPY go.* .
+COPY go.* ./
 COPY pkg pkg
 COPY services/todo services/todo
 # build
+ARG SKAFFOLD_GO_GCFLAGS
 RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache/go-build \
     GCFLAGS="${SKAFFOLD_GO_GCFLAGS}" go build -o todo-service ./services/todo
 

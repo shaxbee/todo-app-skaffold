@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1-experimental
 FROM golang:1.15.3 AS builder
 WORKDIR /opt/build
-COPY go.* .
+COPY go.* ./
 COPY pkg/dbutil pkg/dbutil
 COPY cmd/goose cmd/goose
 COPY services/todo/migrations services/todo/migrations
