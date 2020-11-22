@@ -2,11 +2,12 @@ ifndef include_skaffold_mk
 _include_skaffold_mk := 1
 
 include makefiles/shared.mk
+include makefiles/kubectl.mk
 
 SKAFFOLD := bin/skaffold
 SKAFFOLD_VERSION ?= 1.16.0
 
-$(SKAFFOLD):
+$(SKAFFOLD): $(KUBECTL)
 	$(info $(_bullet) Installing <skaffold>)
 	@mkdir -p bin
 	curl -sSfL https://storage.googleapis.com/skaffold/releases/v$(SKAFFOLD_VERSION)/skaffold-$(OS)-amd64 -o $(SKAFFOLD)
