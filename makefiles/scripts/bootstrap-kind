@@ -38,9 +38,6 @@ if [ "${registry_running}" != 'true' ]; then
     registry:2 &>/dev/null
 fi
 
-reg_host="${reg_name}"
-reg_host="$(docker inspect -f '{{.NetworkSettings.IPAddress}}' "${reg_name}")"
-
 # create a cluster with the local registry enabled in containerd
 cat <<EOF | kind create cluster --name "${CLUSTER_NAME}" --config=-
 kind: Cluster
@@ -55,7 +52,7 @@ nodes:
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]
-    endpoint = ["http://${reg_host}:5000"]
+    endpoint = ["http://${reg_name}:5000"]
 EOF
 
 cat <<EOF | kubectl apply -f -
