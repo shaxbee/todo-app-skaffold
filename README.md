@@ -12,8 +12,13 @@ Todo App built in Go with [Skaffold](https://github.com/GoogleContainerTools/ska
 
 ## Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/).
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+- [Docker](https://docs.docker.com/get-docker/)
+
+### Fetch submodules
+
+```sh
+git submodule update --init --recursive
+```
 
 ### macOS
 
@@ -22,8 +27,6 @@ Install Docker with brew:
 ```sh
 brew cask install docker
 ```
-
-Kubectl is included with Docker installation.
 
 ## Development
 
