@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"mime"
 	"net/http"
-
-	"github.com/shaxbee/todo-app-skaffold/pkg/httperror"
 )
 
 // JSONRequest expects application/json content-type and attempts
@@ -17,7 +15,7 @@ import (
 func JSONRequest(req *http.Request, dst interface{}) error {
 	mt, _, err := mime.ParseMediaType(req.Header.Get("Content-Type"))
 	if err != nil || mt != "application/json" {
-		return httperror.New(http.StatusUnsupportedMediaType)
+		return NewError(http.StatusUnsupportedMediaType)
 	}
 
 	data, err := ioutil.ReadAll(req.Body)
@@ -26,10 +24,10 @@ func JSONRequest(req *http.Request, dst interface{}) error {
 	}
 
 	if err := json.Unmarshal(data, dst); err != nil {
-		return httperror.New(
+		return NewError(
 			http.StatusBadRequest,
-			httperror.Message("Failed to unmarshal request body"),
-			httperror.Cause(err),
+			Message("Failed to unmarshal request body"),
+			Cause(err),
 		)
 	}
 
@@ -46,10 +44,10 @@ func JSONResponse(w http.ResponseWriter, status int, src interface{}) error {
 
 	data, err := json.Marshal(src)
 	if err != nil {
-		return httperror.New(
+		return NewError(
 			http.StatusInternalServerError,
-			httperror.Message("Failed to marshal response body"),
-			httperror.Cause(err),
+			Message("Failed to marshal response body"),
+			Cause(err),
 		)
 	}
 

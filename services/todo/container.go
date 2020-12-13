@@ -13,6 +13,7 @@ import (
 
 	"github.com/shaxbee/todo-app-skaffold/pkg/dbutil"
 	"github.com/shaxbee/todo-app-skaffold/pkg/httprouter"
+	"github.com/shaxbee/todo-app-skaffold/pkg/middleware/cors"
 	"github.com/shaxbee/todo-app-skaffold/services/todo/server"
 )
 
@@ -68,10 +69,15 @@ func (c *container) HTTPServer(ctx context.Context) *http.Server {
 	c.once.httpServer.Do(func() {
 		todoServer := c.TodoServer(ctx)
 
-		router := httprouter.New(
+		opts := []httprouter.Opt{
 			httprouter.Verbose(c.config.Dev),
-			httprouter.CorsEnabled(c.config.Server.CorsEnabled),
-		)
+		}
+
+		if c.config.Server.CorsEnabled {
+			opts = append(opts, cors.RouterOpts()...)
+		}
+
+		router := httprouter.New(opts...)
 
 		todoServer.RegisterRoutes(router)
 

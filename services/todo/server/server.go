@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/shaxbee/todo-app-skaffold/pkg/api"
-	"github.com/shaxbee/todo-app-skaffold/pkg/httperror"
 	"github.com/shaxbee/todo-app-skaffold/pkg/httprouter"
 	"github.com/shaxbee/todo-app-skaffold/services/todo/model"
 )
@@ -41,7 +40,7 @@ func (s *TodoServer) create(w http.ResponseWriter, req *http.Request) error {
 	}
 
 	if len(ctReq.Title) > 20 {
-		return httperror.New(http.StatusBadRequest, httperror.Message("title should have maximum length of 20 characters"))
+		return httprouter.NewError(http.StatusBadRequest, httprouter.Message("title should have maximum length of 20 characters"))
 	}
 
 	id, err := uuid.NewRandom()
@@ -70,14 +69,14 @@ func (s *TodoServer) get(w http.ResponseWriter, req *http.Request) error {
 
 	id, err := uuid.Parse(rawID)
 	if err != nil {
-		return httperror.New(http.StatusBadRequest, httperror.Message("invalid id"), httperror.Cause(err))
+		return httprouter.NewError(http.StatusBadRequest, httprouter.Message("invalid id"), httprouter.Cause(err))
 	}
 
 	t, err := s.queries.Get(ctx, id)
 
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
-		return httperror.New(http.StatusNotFound, httperror.Messagef("todo %q not found", id))
+		return httprouter.NewError(http.StatusNotFound, httprouter.Messagef("todo %q not found", id))
 	case err != nil:
 		return fmt.Errorf("failed to get todo: %w", err)
 	}
@@ -116,7 +115,7 @@ func (s *TodoServer) delete(w http.ResponseWriter, req *http.Request) error {
 
 	id, err := uuid.Parse(rawID)
 	if err != nil {
-		return httperror.New(http.StatusBadRequest, httperror.Message("invalid id"), httperror.Cause(err))
+		return httprouter.NewError(http.StatusBadRequest, httprouter.Message("invalid id"), httprouter.Cause(err))
 	}
 
 	n, err := s.queries.Delete(ctx, id)
@@ -124,7 +123,7 @@ func (s *TodoServer) delete(w http.ResponseWriter, req *http.Request) error {
 	case err != nil:
 		return fmt.Errorf("failed to delete todo: %w", err)
 	case n == 0:
-		return httperror.New(http.StatusNotFound, httperror.Messagef("todo %q not found", id))
+		return httprouter.NewError(http.StatusNotFound, httprouter.Messagef("todo %q not found", id))
 	default:
 		w.WriteHeader(http.StatusNoContent)
 		return nil

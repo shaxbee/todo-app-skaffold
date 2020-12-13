@@ -1,4 +1,4 @@
-package httperror
+package httprouter
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ type Error struct {
 	Cause   error
 }
 
-func New(status int, opts ...Opt) Error {
+func NewError(status int, opts ...ErrorOpt) Error {
 	err := Error{Status: status}
 
 	for _, opt := range opts {
@@ -34,21 +34,21 @@ func (e Error) Error() string {
 	return e.Message
 }
 
-type Opt func(*Error)
+type ErrorOpt func(*Error)
 
-func Message(message string) Opt {
+func Message(message string) ErrorOpt {
 	return func(e *Error) {
 		e.Message = message
 	}
 }
 
-func Messagef(format string, a ...interface{}) Opt {
+func Messagef(format string, a ...interface{}) ErrorOpt {
 	return func(e *Error) {
 		e.Message = fmt.Sprintf(format, a...)
 	}
 }
 
-func Cause(cause error) Opt {
+func Cause(cause error) ErrorOpt {
 	return func(e *Error) {
 		e.Cause = cause
 	}
@@ -62,4 +62,13 @@ func IsStatus(err error, status int) bool {
 	default:
 		return status == http.StatusInternalServerError
 	}
+}
+
+func AsError(err error) Error {
+	httpErr := Error{}
+	if !errors.As(err, &httpErr) {
+		return NewError(http.StatusInternalServerError, Cause(err))
+	}
+
+	return httpErr
 }

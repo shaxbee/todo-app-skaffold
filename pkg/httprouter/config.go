@@ -1,10 +1,6 @@
 package httprouter
 
-import (
-	"strconv"
-	"strings"
-	"time"
-)
+import "net/http"
 
 type Opt func(c *config)
 
@@ -14,55 +10,31 @@ func Verbose(verbose bool) Opt {
 	}
 }
 
-func CorsEnabled(enabled bool) Opt {
+func ErrorHandler(handler ErrorHandlerFunc) Opt {
 	return func(c *config) {
-		c.corsEnabled = enabled
+		c.errorHandler = handler
 	}
 }
 
-func CorsOrigin(origin string) Opt {
+func Middleware(middleware ...MiddlewareFunc) Opt {
 	return func(c *config) {
-		c.corsOrigin = origin
+		c.middleware = append(c.middleware, middleware...)
 	}
 }
 
-func CorsRequestHeaders(headers []string) Opt {
+func GlobalOptions(handler http.HandlerFunc) Opt {
 	return func(c *config) {
-		c.corsRequestHeaders = strings.Join(headers, ", ")
-	}
-}
-
-func CorsAllowCredentials(allowCredentials bool) Opt {
-	return func(c *config) {
-		c.corsAllowCredentials = allowCredentials
-	}
-}
-
-func CorsMaxAge(maxAge time.Duration) Opt {
-	return func(c *config) {
-		c.corsMaxAge = strconv.FormatInt(int64(maxAge), 10)
+		c.globalOptions = handler
 	}
 }
 
 type config struct {
-	verbose              bool
-	corsEnabled          bool
-	corsOrigin           string
-	corsRequestHeaders   string
-	corsAllowCredentials bool
-	corsMaxAge           string
-}
-
-func (c config) CorsOriginWildcard() bool {
-	return c.corsOrigin == "*"
-}
-
-func (c config) CorsRequestHeadersWildcard() bool {
-	return c.corsRequestHeaders == "*"
+	verbose       bool
+	errorHandler  ErrorHandlerFunc
+	middleware    []MiddlewareFunc
+	globalOptions http.HandlerFunc
 }
 
 var defaultConfig = config{
-	corsOrigin:           "*",
-	corsRequestHeaders:   "*",
-	corsAllowCredentials: true,
+	errorHandler: DefaultErrorHandler,
 }
