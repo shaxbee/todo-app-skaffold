@@ -17,6 +17,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+KIND="${KIND:-kind}"
+KUBECTL="${KUBECTL:-kubectl}"
 CLUSTER_NAME="${CLUSTER_NAME:-local}"
 K8S_VERSION="${K8S_VERSION:-1.17.11}"
 HOST_PORT="${HOST_PORT:-80}"
@@ -25,7 +27,7 @@ kind_network='kind'
 reg_name='kind-registry'
 reg_port='5000'
 
-cluster_running="$(kind get clusters | grep "${CLUSTER_NAME}" || true)"
+cluster_running="$(${KIND} get clusters | grep "${CLUSTER_NAME}" || true)"
 if [ "${cluster_running}" == "${CLUSTER_NAME}" ]; then
   exit 0
 fi
@@ -39,7 +41,7 @@ if [ "${registry_running}" != 'true' ]; then
 fi
 
 # create a cluster with the local registry enabled in containerd
-cat <<EOF | kind create cluster --name "${CLUSTER_NAME}" --config=-
+cat <<EOF | ${KIND} create cluster --name "${CLUSTER_NAME}" --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
@@ -55,7 +57,7 @@ containerdConfigPatches:
     endpoint = ["http://${reg_name}:5000"]
 EOF
 
-cat <<EOF | kubectl apply -f -
+cat <<EOF | ${KUBECTL} apply -f -
 apiVersion: v1
 kind: ConfigMap
 metadata:

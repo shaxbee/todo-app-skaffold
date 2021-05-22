@@ -1,5 +1,5 @@
 # syntax = docker/dockerfile:1-experimental
-FROM golang:1.15.3 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.15.3 AS builder
 # copy source files
 WORKDIR /opt/build
 COPY go.* ./
@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
     GCFLAGS="${SKAFFOLD_GO_GCFLAGS}" go build -o todo-service ./services/todo
 
 # create runtime container from minimal image containing libc, tzdata and root-ca
-FROM gcr.io/distroless/base-debian10
+FROM --platform=$BUILDPLATFORM gcr.io/distroless/base-debian10
 # copy binary built in builder container
 COPY --from=builder /opt/build/todo-service /bin/todo-service
 # setup GOTRACEBACK, it will be overriden by Skaffold when debugging

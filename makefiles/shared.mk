@@ -2,6 +2,7 @@ ifndef _include_shared_mk
 _include_shared_mk := 1
 
 OS ?= $(shell uname -s | tr [:upper:] [:lower:])
+ARCH ?= $(shell uname -m | tr [:upper:] [:lower])
 
 .PHONY: help clean deps vendor generate format lint test test-coverage integration-test build bootrap deploy run dev debug
 
