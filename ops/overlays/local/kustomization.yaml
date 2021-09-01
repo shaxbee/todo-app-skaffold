@@ -5,6 +5,12 @@ bases:
 resources:
   - proxy.yaml
   - apidoc.yaml
-  - todo-db-credentials.yaml
+secretGenerator:
+  - name: todo-db-credentials
+    literals:
+      - PGDATABASE=todo
+      - PGHOST=postgres
+      - PGUSER=todo
+      - PGSSLMODE=disable
 patchesStrategicMerge:
   - todo.yaml
