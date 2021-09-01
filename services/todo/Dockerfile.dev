@@ -1,5 +1,4 @@
-# syntax = docker/dockerfile:1-experimental
-FROM golang:1.15.3
+FROM golang:1.17.0-buster AS builder
 # install xz required to uncompress watchexec
 RUN apt-get -qq update && \
     apt-get -q -y install xz-utils && \
