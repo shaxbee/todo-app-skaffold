@@ -3,7 +3,7 @@ package cors
 import (
 	"net/http"
 
-	"github.com/shaxbee/todo-app-skaffold/pkg/httprouter"
+	"github.com/shaxbee/todo-app-skaffold/internal/httprouter"
 )
 
 func RouterOpts(opts ...Opt) []httprouter.Opt {

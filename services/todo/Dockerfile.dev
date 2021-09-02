@@ -1,4 +1,4 @@
-FROM golang:1.17.0-buster AS builder
+FROM golang:1.16.7-buster AS builder
 # install xz required to uncompress watchexec
 RUN apt-get -qq update && \
     apt-get -q -y install xz-utils && \
@@ -11,7 +11,8 @@ RUN curl -sSfL https://github.com/watchexec/watchexec/releases/download/${WATCHE
 # copy source files
 WORKDIR /opt/build
 COPY go.* .
-COPY pkg pkg
+COPY api api
+COPY internal internal
 COPY services/todo services/todo
 # download dependencies
 RUN go get ./services/todo/...

@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package server_test
@@ -8,14 +9,15 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/shaxbee/todo-app-skaffold/pkg/api"
-	"github.com/shaxbee/todo-app-skaffold/pkg/dbtest"
-	"github.com/shaxbee/todo-app-skaffold/pkg/httprouter"
-	"github.com/shaxbee/todo-app-skaffold/pkg/servertest"
-	"github.com/shaxbee/todo-app-skaffold/services/todo/server"
 	"github.com/stretchr/testify/assert"
 
-	_ "github.com/lib/pq"
+	"github.com/shaxbee/todo-app-skaffold/api"
+	"github.com/shaxbee/todo-app-skaffold/internal/dbtest"
+	"github.com/shaxbee/todo-app-skaffold/internal/httprouter"
+	"github.com/shaxbee/todo-app-skaffold/internal/servertest"
+	"github.com/shaxbee/todo-app-skaffold/services/todo/server"
+
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 func TestAPI(t *testing.T) {

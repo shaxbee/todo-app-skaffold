@@ -11,9 +11,8 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/shaxbee/todo-app-skaffold/pkg/dbutil"
-	"github.com/shaxbee/todo-app-skaffold/pkg/httprouter"
-	"github.com/shaxbee/todo-app-skaffold/pkg/middleware/cors"
+	"github.com/shaxbee/todo-app-skaffold/internal/httprouter"
+	"github.com/shaxbee/todo-app-skaffold/internal/middleware/cors"
 	"github.com/shaxbee/todo-app-skaffold/services/todo/server"
 )
 
@@ -41,17 +40,15 @@ func (c *container) DB(ctx context.Context) *sql.DB {
 			return
 		}
 
-		var err error
-		c.db, err = dbutil.Open(
-			ctx,
-			"postgres",
-			c.config.DB.DSN,
-			dbutil.MaxIdleConns(c.config.DB.MaxIdleConns),
-			dbutil.MaxOpenConns(c.config.DB.MaxOpenConns),
-		)
+		db, err := sql.Open("pgx", c.config.DB.DSN)
 		if err != nil {
 			log.Fatal("failed to connect to database: %w", err)
 		}
+
+		db.SetMaxIdleConns(c.config.DB.MaxIdleConns)
+		db.SetMaxOpenConns(c.config.DB.MaxOpenConns)
+
+		c.db = db
 	})
 
 	return c.db

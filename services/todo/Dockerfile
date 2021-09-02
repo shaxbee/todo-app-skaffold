@@ -1,8 +1,9 @@
-FROM golang:1.17.0-buster AS builder
+FROM golang:1.16.7-buster AS builder
 # copy source files
 WORKDIR /opt/build
 COPY go.* ./
-COPY pkg pkg
+COPY api api
+COPY internal internal
 COPY services/todo services/todo
 # build
 ARG SKAFFOLD_GO_GCFLAGS

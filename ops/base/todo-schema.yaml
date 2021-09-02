@@ -19,7 +19,6 @@ spec:
             - "goose"
             - "-dir"
             - "./services/todo/migrations"
-            - "postgres"
             - "postgres://"
             - "up"
           envFrom:

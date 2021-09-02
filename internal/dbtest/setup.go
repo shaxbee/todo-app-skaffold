@@ -1,4 +1,4 @@
-// +build integration
+//go:build integration
 
 package dbtest
 
@@ -13,7 +13,7 @@ import (
 	"github.com/cenkalti/backoff/v3"
 	"github.com/ory/dockertest/v3"
 	"github.com/pressly/goose"
-	"github.com/shaxbee/todo-app-skaffold/pkg/dbutil"
+	"github.com/shaxbee/todo-app-skaffold/internal/dbutil"
 )
 
 func SetupPostgres(t testing.TB, opts ...Opt) *sql.DB {
@@ -61,12 +61,12 @@ func SetupPostgres(t testing.TB, opts ...Opt) *sql.DB {
 
 	t.Logf("started container %q", name)
 
-	dsn := fmt.Sprintf("port=%s user=%s dbname=%s sslmode=disable", resource.GetPort("5432/tcp"), c.user, c.database)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable", resource.GetBoundIP("5432/tcp"), resource.GetPort("5432/tcp"), c.user, c.database)
 	return openDB(t, dsn, c.migrations, c.Backoff())
 }
 
 func openDB(t testing.TB, dsn, migrations string, bo backoff.BackOff) *sql.DB {
-	db, err := dbutil.Open(context.Background(), "postgres", dsn, dbutil.Backoff(bo))
+	db, err := dbutil.Open(context.Background(), "pgx", dsn, dbutil.Backoff(bo))
 	if err != nil {
 		t.Fatalf("failed to open database: %v", err)
 	}

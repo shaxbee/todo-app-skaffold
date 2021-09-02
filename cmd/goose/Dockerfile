@@ -1,7 +1,6 @@
-FROM golang:1.17.0-buster AS builder
+FROM golang:1.16.7-buster AS builder
 WORKDIR /opt/build
 COPY go.* ./
-COPY pkg/dbutil pkg/dbutil
 COPY cmd/goose cmd/goose
 COPY services/todo/migrations services/todo/migrations
 ARG SKAFFOLD_GO_GCFLAGS

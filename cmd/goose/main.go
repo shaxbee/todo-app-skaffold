@@ -1,16 +1,15 @@
 package main
 
 import (
-	"context"
+	"database/sql"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/pressly/goose"
-	"github.com/shaxbee/todo-app-skaffold/pkg/dbutil"
 
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 var (
@@ -55,21 +54,14 @@ func main() {
 		return
 	}
 
-	if len(args) < 3 {
+	if len(args) < 2 {
 		flags.Usage()
 		return
 	}
 
-	driver, dbstring, command := args[0], args[1], args[2]
+	dbstring, command := args[0], args[1]
 
-	switch driver {
-	case "redshift":
-		driver = "postgres"
-	case "tidb":
-		driver = "mysql"
-	}
-
-	if err := goose.SetDialect(driver); err != nil {
+	if err := goose.SetDialect("postgres"); err != nil {
 		log.Fatal(err)
 	}
 
@@ -79,7 +71,7 @@ func main() {
 	default:
 	}
 
-	db, err := dbutil.Open(context.Background(), driver, dbstring)
+	db, err := sql.Open("pgx", dbstring)
 	if err != nil {
 		log.Fatalf("-dbstring=%q: %v\n", dbstring, err)
 	}
@@ -101,13 +93,10 @@ func usage() {
 }
 
 var (
-	usagePrefix = `Usage: goose [OPTIONS] DRIVER DBSTRING COMMAND
-
-Drivers:
-    postgres
+	usagePrefix = `Usage: goose [OPTIONS] DBSTRING COMMAND
 
 Example:
-    goose postgres "user=postgres dbname=postgres sslmode=disable" status
+    goose "user=postgres dbname=postgres sslmode=disable" status
 
 Options:
 `

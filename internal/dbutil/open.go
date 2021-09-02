@@ -18,7 +18,7 @@ func Open(ctx context.Context, driver, dsn string, opts ...Opt) (*sql.DB, error)
 
 	err := backoff.Retry(func() error {
 		var err error
-		db, err = sql.Open("postgres", dsn)
+		db, err = sql.Open("pgx", dsn)
 		if err != nil {
 			return err
 		}

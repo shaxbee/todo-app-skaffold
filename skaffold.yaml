@@ -14,7 +14,7 @@ build:
         dockerfile: cmd/goose/Dockerfile
     - image: apidoc
       docker:
-        dockerfile: api/Dockerfile
+        dockerfile: api-spec/Dockerfile
   local:
     useBuildkit: true
 deploy:

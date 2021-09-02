@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/shaxbee/todo-app-skaffold/pkg/api"
-	"github.com/shaxbee/todo-app-skaffold/pkg/httprouter"
+	"github.com/shaxbee/todo-app-skaffold/api"
+	"github.com/shaxbee/todo-app-skaffold/internal/httprouter"
 	"github.com/shaxbee/todo-app-skaffold/services/todo/model"
 )
 
