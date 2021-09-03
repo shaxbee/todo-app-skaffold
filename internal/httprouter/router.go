@@ -2,70 +2,85 @@ package httprouter
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"go.uber.org/zap"
 )
 
 var ParamsFromContext = httprouter.ParamsFromContext
 
 type HandlerFunc func(w http.ResponseWriter, req *http.Request) error
 
-type MiddlewareFunc func(handler HandlerFunc) HandlerFunc
+type Middleware func(handler HandlerFunc) HandlerFunc
 
-type ErrorHandlerFunc func(w http.ResponseWriter, req *http.Request, verbose bool, err error)
+type ErrorHandlerFunc func(w http.ResponseWriter, req *http.Request, err error)
+
+type PanicHandlerFunc func(w http.ResponseWriter, req *http.Request, pv interface{})
 
 type Router struct {
-	config   config
-	delegate *httprouter.Router
+	logger       *zap.Logger
+	config       config
+	delegate     *httprouter.Router
+	errorHandler ErrorHandlerFunc
 }
 
-func New(opts ...Opt) *Router {
+func New(logger *zap.Logger, opts ...Opt) *Router {
 	c := defaultConfig
 	for _, opt := range opts {
 		opt(&c)
 	}
 
+	errorHandler := c.errorHandler(logger, c.verbose)
+
 	delegate := httprouter.New()
 	delegate.HandleMethodNotAllowed = true
-	delegate.NotFound = adaptHandler(c, func(http.ResponseWriter, *http.Request) error {
+	delegate.NotFound = adaptHandler(logger, errorHandler, func(http.ResponseWriter, *http.Request) error {
 		return NewError(http.StatusNotFound)
 	})
-	delegate.MethodNotAllowed = adaptHandler(c, func(http.ResponseWriter, *http.Request) error {
+	delegate.MethodNotAllowed = adaptHandler(logger, errorHandler, func(http.ResponseWriter, *http.Request) error {
 		return NewError(http.StatusMethodNotAllowed)
 	})
+	delegate.PanicHandler = c.panicHandler(logger, c.verbose)
 
 	if c.globalOptions != nil {
 		delegate.HandleOPTIONS = true
-		delegate.GlobalOPTIONS = c.globalOptions
+		delegate.GlobalOPTIONS = adaptHandler(logger, errorHandler, c.globalOptions)
 	}
 
 	return &Router{
-		config:   c,
-		delegate: delegate,
+		logger:       logger,
+		config:       c,
+		delegate:     delegate,
+		errorHandler: errorHandler,
 	}
 }
 
-func (r *Router) Handler(method, path string, handler HandlerFunc, middleware ...MiddlewareFunc) {
+func (r *Router) Handler(method, path string, handler HandlerFunc, middleware ...Middleware) {
 	middleware = append(r.config.middleware, middleware...)
 
 	for _, mw := range middleware {
 		handler = mw(handler)
 	}
 
-	r.delegate.HandlerFunc(method, path, adaptHandler(r.config, handler))
+	r.delegate.HandlerFunc(method, path, adaptHandler(r.logger, r.errorHandler, handler))
 }
 
 func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	r.delegate.ServeHTTP(w, req)
 }
 
-func adaptHandler(c config, handler HandlerFunc) http.HandlerFunc {
+func adaptHandler(logger *zap.Logger, errorHandler ErrorHandlerFunc, handler HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		err := handler(w, req)
-		if err == nil {
-			return
+		start := time.Now()
+
+		rw := NewResponseWriter(w)
+
+		err := handler(rw, req)
+		if err != nil {
+			errorHandler(rw, req, err)
 		}
 
-		c.errorHandler(w, req, c.verbose, err)
+		logger.Info("http request", zap.String("path", req.URL.Path), zap.Int("status", rw.StatusCode()), zap.Duration("elapsed", time.Since(start)))
 	})
 }

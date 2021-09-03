@@ -1,4 +1,4 @@
-package server
+package todo
 
 import (
 	"database/sql"
@@ -13,17 +13,17 @@ import (
 	"github.com/shaxbee/todo-app-skaffold/services/todo/model"
 )
 
-type TodoServer struct {
+type Server struct {
 	queries *model.Queries
 }
 
-func New(db model.DBTX) *TodoServer {
-	return &TodoServer{
+func NewServer(db model.DBTX) *Server {
+	return &Server{
 		queries: model.New(db),
 	}
 }
 
-func (s *TodoServer) RegisterRoutes(router *httprouter.Router) {
+func (s *Server) RegisterRoutes(router *httprouter.Router) {
 	router.Handler(http.MethodPost, "/api/v1/todo", s.create)
 	router.Handler(http.MethodGet, "/api/v1/todo/:id", s.get)
 	router.Handler(http.MethodGet, "/api/v1/todo", s.list)
@@ -31,7 +31,7 @@ func (s *TodoServer) RegisterRoutes(router *httprouter.Router) {
 	router.Handler(http.MethodDelete, "/api/v1/todo", s.deleteAll)
 }
 
-func (s *TodoServer) create(w http.ResponseWriter, req *http.Request) error {
+func (s *Server) create(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
 	var ctReq api.CreateTodoRequest
@@ -62,21 +62,29 @@ func (s *TodoServer) create(w http.ResponseWriter, req *http.Request) error {
 	})
 }
 
-func (s *TodoServer) get(w http.ResponseWriter, req *http.Request) error {
+func (s *Server) get(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
 	rawID := httprouter.ParamsFromContext(ctx).ByName("id")
 
 	id, err := uuid.Parse(rawID)
 	if err != nil {
-		return httprouter.NewError(http.StatusBadRequest, httprouter.Message("invalid id"), httprouter.Cause(err))
+		return httprouter.NewError(
+			http.StatusBadRequest,
+			httprouter.Message("invalid id"),
+			httprouter.Cause(err),
+		)
 	}
 
 	t, err := s.queries.Get(ctx, id)
 
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
-		return httprouter.NewError(http.StatusNotFound, httprouter.Messagef("todo %q not found", id))
+		return httprouter.NewError(
+			http.StatusNotFound,
+			httprouter.Messagef("todo %q not found", id),
+			httprouter.Operational(),
+		)
 	case err != nil:
 		return fmt.Errorf("failed to get todo: %w", err)
 	}
@@ -88,7 +96,7 @@ func (s *TodoServer) get(w http.ResponseWriter, req *http.Request) error {
 	})
 }
 
-func (s *TodoServer) list(w http.ResponseWriter, req *http.Request) error {
+func (s *Server) list(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
 	todos, err := s.queries.List(ctx)
@@ -108,14 +116,18 @@ func (s *TodoServer) list(w http.ResponseWriter, req *http.Request) error {
 	return httprouter.JSONResponse(w, http.StatusOK, resTodos)
 }
 
-func (s *TodoServer) delete(w http.ResponseWriter, req *http.Request) error {
+func (s *Server) delete(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
 	rawID := httprouter.ParamsFromContext(ctx).ByName("id")
 
 	id, err := uuid.Parse(rawID)
 	if err != nil {
-		return httprouter.NewError(http.StatusBadRequest, httprouter.Message("invalid id"), httprouter.Cause(err))
+		return httprouter.NewError(
+			http.StatusBadRequest,
+			httprouter.Message("invalid id"),
+			httprouter.Cause(err),
+		)
 	}
 
 	n, err := s.queries.Delete(ctx, id)
@@ -123,14 +135,18 @@ func (s *TodoServer) delete(w http.ResponseWriter, req *http.Request) error {
 	case err != nil:
 		return fmt.Errorf("failed to delete todo: %w", err)
 	case n == 0:
-		return httprouter.NewError(http.StatusNotFound, httprouter.Messagef("todo %q not found", id))
+		return httprouter.NewError(
+			http.StatusNotFound,
+			httprouter.Messagef("todo %q not found", id),
+			httprouter.Operational(),
+		)
 	default:
 		w.WriteHeader(http.StatusNoContent)
 		return nil
 	}
 }
 
-func (s *TodoServer) deleteAll(w http.ResponseWriter, req *http.Request) error {
+func (s *Server) deleteAll(w http.ResponseWriter, req *http.Request) error {
 	if err := s.queries.DeleteAll(req.Context()); err != nil {
 		return fmt.Errorf("failed to delete all todos: %w", err)
 	}

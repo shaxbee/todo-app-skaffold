@@ -7,9 +7,10 @@ import (
 )
 
 type Error struct {
-	Status  int
-	Message string
-	Cause   error
+	Status      int
+	Message     string
+	Operational bool
+	Cause       error
 }
 
 func NewError(status int, opts ...ErrorOpt) Error {
@@ -45,6 +46,12 @@ func Message(message string) ErrorOpt {
 func Messagef(format string, a ...interface{}) ErrorOpt {
 	return func(e *Error) {
 		e.Message = fmt.Sprintf(format, a...)
+	}
+}
+
+func Operational() ErrorOpt {
+	return func(e *Error) {
+		e.Operational = true
 	}
 }
 

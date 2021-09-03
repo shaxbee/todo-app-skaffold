@@ -6,7 +6,7 @@ build:
   artifacts:
     - image: todo
       docker:
-        dockerfile: services/todo/Dockerfile
+        dockerfile: cmd/todo-service/Dockerfile
       sync:
         infer: []
     - image: goose
@@ -34,9 +34,9 @@ portForward:
 profiles:
   - name: local
     activation:
-      - command: run
-      - command: dev
       - command: debug
+      - command: dev
+      - command: run
     deploy:
       kubeContext: kind-local
       kustomize:
@@ -48,4 +48,4 @@ profiles:
     patches:
       - op: replace
         path: /build/artifacts/0/docker/dockerfile
-        value: services/todo/Dockerfile.dev
+        value: cmd/todo-service/Dockerfile.dev

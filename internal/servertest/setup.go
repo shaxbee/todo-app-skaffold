@@ -19,12 +19,15 @@ func Setup(t testing.TB, opts ...Opt) string {
 
 	endpoint := c.Endpoint()
 	if endpoint != "" {
+		t.Logf("servertest: connecting to %q", endpoint)
 		waitReady(t, endpoint, c.Backoff())
 		return endpoint
 	}
 
 	server := httptest.NewServer(c.makeHandler())
 	addr := server.Listener.Addr().String()
+
+	t.Logf("servertest: listening at %q", addr)
 
 	t.Cleanup(server.Close)
 
@@ -47,7 +50,7 @@ func waitReady(t testing.TB, endpoint string, bo backoff.BackOff) {
 		return nil
 	}, bo)
 	if err != nil {
-		t.Fatalf("failed to connect to server: %v", err)
+		t.Fatalf("servertest: connect: %v", err)
 	}
 }
 
@@ -67,7 +70,7 @@ func parseEndpoint(t testing.TB, endpoint string) string {
 	case parsed.Scheme == "https":
 		return parsed.Host + ":443"
 	default:
-		t.Fatalf("unsupported endpoint %q", endpoint)
+		t.Fatalf("servertest: unsupported endpoint %q", endpoint)
 		return ""
 	}
 }

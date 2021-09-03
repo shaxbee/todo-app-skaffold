@@ -11,10 +11,11 @@ RUN curl -sSfL https://github.com/watchexec/watchexec/releases/download/${WATCHE
 # copy source files
 WORKDIR /opt/build
 COPY go.* .
+COPY cmd/todo-service cmd/todo-service
 COPY api api
 COPY internal internal
 COPY services/todo services/todo
 # download dependencies
-RUN go get ./services/todo/...
+RUN go get ./cmd/todo-service
 # restart service on file changes
-CMD watchexec -r -- go run ./services/todo
+CMD watchexec -r -- go run ./cmd/todo-service

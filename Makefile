@@ -27,7 +27,7 @@ build-goose: ## Build goose
 
 build-todo-service: ## Build todo-service
 	$(info $(_bullet) Building <todo-service>) 
-	$(GO) build -o bin/todo-service ./services/todo
+	$(GO) build -o bin/todo-service ./cmd/todo-service
 
 bootstrap-deployment: $(KUBECTL) ## Bootstrap deployment
 	$(info $(_bullet) Bootstraping <deployment>)

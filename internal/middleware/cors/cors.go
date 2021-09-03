@@ -8,21 +8,21 @@ import (
 
 func RouterOpts(opts ...Opt) []httprouter.Opt {
 	return []httprouter.Opt{
-		httprouter.GlobalOptions(GlobalOptions(opts...)),
-		httprouter.Middleware(Middleware(opts...)),
+		httprouter.WithGlobalOptions(GlobalOptions(opts...)),
+		httprouter.WithMiddleware(Middleware(opts...)),
 	}
 }
 
-func GlobalOptions(opts ...Opt) http.HandlerFunc {
+func GlobalOptions(opts ...Opt) httprouter.HandlerFunc {
 	c := defaultConfig
 	for _, opt := range opts {
 		opt(&c)
 	}
 
-	return func(w http.ResponseWriter, req *http.Request) {
+	return func(w http.ResponseWriter, req *http.Request) error {
 		if req.Header.Get("Access-Control-Request-Method") == "" {
 			w.WriteHeader(http.StatusNoContent)
-			return
+			return nil
 		}
 
 		header := w.Header()
@@ -37,7 +37,7 @@ func GlobalOptions(opts ...Opt) http.HandlerFunc {
 		case c.OriginWildcard():
 			header.Set("Access-Control-Allow-Origin", c.origin)
 		default:
-			return
+			return nil
 		}
 
 		switch {
@@ -58,10 +58,12 @@ func GlobalOptions(opts ...Opt) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusNoContent)
+
+		return nil
 	}
 }
 
-func Middleware(opts ...Opt) httprouter.MiddlewareFunc {
+func Middleware(opts ...Opt) httprouter.Middleware {
 	c := defaultConfig
 	for _, opt := range opts {
 		opt(&c)

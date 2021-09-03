@@ -12,7 +12,8 @@ import (
 
 	"github.com/cenkalti/backoff/v3"
 	"github.com/ory/dockertest/v3"
-	"github.com/pressly/goose"
+	"github.com/pressly/goose/v3"
+
 	"github.com/shaxbee/todo-app-skaffold/internal/dbutil"
 )
 
@@ -30,7 +31,7 @@ func SetupPostgres(t testing.TB, opts ...Opt) *sql.DB {
 
 	pool, err := dockertest.NewPool("")
 	if err != nil {
-		t.Fatalf("failed to create pool: %v", err)
+		t.Fatalf("dbtest: create pool: %v", err)
 	}
 
 	name := containerName("postgres")
@@ -46,7 +47,7 @@ func SetupPostgres(t testing.TB, opts ...Opt) *sql.DB {
 		},
 	})
 	if err != nil {
-		t.Fatalf("failed to start postgres: %v", err)
+		t.Fatalf("dbtest: start postgres: %v", err)
 	}
 
 	t.Cleanup(func() {
@@ -55,29 +56,31 @@ func SetupPostgres(t testing.TB, opts ...Opt) *sql.DB {
 		}
 
 		if err := pool.Purge(resource); err != nil {
-			t.Errorf("failed to purge pool: %v", err)
+			t.Errorf("dbtest: purge pool: %v", err)
 		}
 	})
 
-	t.Logf("started container %q", name)
+	t.Logf("dbtest: started container %q", name)
 
 	dsn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable", resource.GetBoundIP("5432/tcp"), resource.GetPort("5432/tcp"), c.user, c.database)
 	return openDB(t, dsn, c.migrations, c.Backoff())
 }
 
 func openDB(t testing.TB, dsn, migrations string, bo backoff.BackOff) *sql.DB {
+	t.Helper()
+
 	db, err := dbutil.Open(context.Background(), "pgx", dsn, dbutil.Backoff(bo))
 	if err != nil {
-		t.Fatalf("failed to open database: %v", err)
+		t.Fatalf("dbtest: open database: %v", err)
 	}
 
-	t.Logf("connected to database %q", dsn)
+	t.Logf("dbtest: connected to %q", dsn)
 
 	if migrations != "" {
-		t.Logf("goose: running migrations")
+		t.Logf("dbtest: running migrations from %q", migrations)
 
 		if err := goose.Up(db, migrations); err != nil {
-			t.Fatalf("failed to migrate: %v", err)
+			t.Fatalf("dbtest: migrate: %v", err)
 		}
 	}
 

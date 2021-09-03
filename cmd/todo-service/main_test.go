@@ -1,21 +1,19 @@
 //go:build integration
 // +build integration
 
-package server_test
+package main
 
 import (
 	"context"
 	"net/http"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/shaxbee/todo-app-skaffold/api"
 	"github.com/shaxbee/todo-app-skaffold/internal/dbtest"
-	"github.com/shaxbee/todo-app-skaffold/internal/httprouter"
 	"github.com/shaxbee/todo-app-skaffold/internal/servertest"
-	"github.com/shaxbee/todo-app-skaffold/services/todo/server"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
@@ -25,13 +23,17 @@ func TestAPI(t *testing.T) {
 	defer cancel()
 
 	endpoint := servertest.Setup(t, servertest.MakeHandler(func() http.Handler {
-		router := httprouter.New(httprouter.Verbose(true))
+		config, err := parseConfig()
+		if err != nil {
+			t.Fatal(err)
+		}
 
-		db := dbtest.SetupPostgres(t, dbtest.Migration("../migrations"))
-		todoServer := server.New(db)
-		todoServer.RegisterRoutes(router)
+		config.Dev = true
 
-		return router
+		cont := newContainer(config)
+		cont.state.db = dbtest.SetupPostgres(t, dbtest.Migration("../../services/todo/migrations"))
+
+		return cont.httpRouter()
 	}))
 
 	client := api.NewAPIClient(&api.Configuration{
@@ -53,7 +55,9 @@ func TestAPI(t *testing.T) {
 			t.Fatalf("failed to create todo: %v", err)
 		}
 
-		assert.Equal(t, http.StatusCreated, httpRes.StatusCode, "failed to create todo: unexpected status")
+		if http.StatusCreated != httpRes.StatusCode {
+			t.Errorf("failed to create todo: unexpected status %d", httpRes.StatusCode)
+		}
 
 		return res.Id
 	}
@@ -88,61 +92,107 @@ func TestAPI(t *testing.T) {
 		}
 	}
 
+	deleteAllTodos := func(t *testing.T) bool {
+		//nolint:bodyclose
+		httpRes, err := client.TodoApi.DeleteAllTodos(ctx).Execute()
+		switch {
+		case err != nil && httpRes == nil:
+			t.Errorf("failed to delete all todos: %v", err)
+			return false
+		case err != nil && httpRes.StatusCode != http.StatusNoContent:
+			t.Errorf("failed to delete all todos: unexpected status code %d", httpRes.StatusCode)
+			return false
+		default:
+			return httpRes.StatusCode == http.StatusNoContent
+		}
+	}
+
 	t.Run("create todo", func(t *testing.T) {
 		id := createTodo(t, title, content)
 		t.Cleanup(func() { deleteTodo(t, id) })
 
-		assert.NotZero(t, id, "expected non zero id")
+		if id == uuid.Nil {
+			t.Error("expected non zero id")
+		}
 
 		otherID := createTodo(t, title, content)
 		t.Cleanup(func() { deleteTodo(t, otherID) })
 
-		assert.NotEqual(t, otherID, id, "expected unique id")
+		if otherID == id {
+			t.Error("expected unique id")
+		}
 	})
 
 	t.Run("get todo", func(t *testing.T) {
 		id := createTodo(t, title, content)
 		t.Cleanup(func() { deleteTodo(t, id) })
 
-		todo, exists := getTodo(t, id)
+		actual, exists := getTodo(t, id)
 
-		assert.True(t, exists, "expected todo to exist")
-		assert.Equal(t, api.Todo{
+		if !exists {
+			t.Error("expected todo to exist")
+		}
+
+		expected := api.Todo{
 			Id:      id,
 			Title:   title,
 			Content: content,
-		}, todo)
+		}
 
-		_, exists = getTodo(t, uuid.New())
-		assert.False(t, exists)
+		if diff := cmp.Diff(expected, actual); diff != "" {
+			t.Error("expected equal todo:", diff)
+		}
+
+		if _, exists = getTodo(t, uuid.New()); exists {
+			t.Error("unexpected todo")
+		}
 	})
 
 	t.Run("list todos", func(t *testing.T) {
+		if !deleteAllTodos(t) {
+			t.FailNow()
+		}
+
 		id := createTodo(t, title, content)
 
 		//nolint:bodyclose
-		todos, httpRes, err := client.TodoApi.ListTodos(ctx).Execute()
+		actual, httpRes, err := client.TodoApi.ListTodos(ctx).Execute()
 		if err != nil {
 			t.Fatalf("failed to list todos: %v", err)
 		}
 
-		assert.Equal(t, http.StatusOK, httpRes.StatusCode, "failed to list todos: unexpected status")
-		assert.Contains(t, todos, api.Todo{
+		if http.StatusOK != httpRes.StatusCode {
+			t.Errorf("failed to list todos: unexpected status %d", httpRes.StatusCode)
+		}
+
+		expected := []api.Todo{{
 			Id:      id,
 			Title:   title,
 			Content: content,
-		}, "expected todo to match")
+		}}
+
+		if diff := cmp.Diff(expected, actual); diff != "" {
+			t.Error("expected equal todos:", diff)
+		}
 	})
 
 	t.Run("delete todo", func(t *testing.T) {
 		id := createTodo(t, title, content)
 
-		assert.True(t, deleteTodo(t, id), "expected todo to be deleted")
+		if !deleteTodo(t, id) {
+			t.Error("expected todo to be deleted")
+		}
 
-		_, exists := getTodo(t, id)
-		assert.False(t, exists, "expected todo to be deleted")
+		if _, exists := getTodo(t, id); exists {
+			t.Error("expected todo to be deleted")
+		}
 
-		assert.False(t, deleteTodo(t, id), "expected previously deleted todo to be not found")
-		assert.False(t, deleteTodo(t, uuid.New()), "expected non-existent todo to be not found")
+		if deleteTodo(t, id) {
+			t.Error("expected previously deleted todo to be not found")
+		}
+
+		if deleteTodo(t, uuid.New()) {
+			t.Error("expected non-existent todo to be not found")
+		}
 	})
 }
