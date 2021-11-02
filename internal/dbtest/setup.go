@@ -39,7 +39,7 @@ func SetupPostgres(t testing.TB, opts ...Opt) *sql.DB {
 
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
 		Name:       name,
-		Repository: c.database,
+		Repository: c.image,
 		Tag:        c.tag,
 		Env: []string{
 			fmt.Sprintf("POSTGRES_USER=%s", c.user),

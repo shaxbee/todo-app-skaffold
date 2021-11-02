@@ -1,4 +1,4 @@
-FROM golang:1.16.7-buster AS builder
+FROM golang:1.17.1-buster AS builder
 # install xz required to uncompress watchexec
 RUN apt-get -qq update && \
     apt-get -q -y install xz-utils && \
