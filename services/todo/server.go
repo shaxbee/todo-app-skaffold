@@ -1,15 +1,16 @@
 package todo
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/goes-funky/httprouter"
 	"github.com/google/uuid"
 
 	"github.com/shaxbee/todo-app-skaffold/api"
-	"github.com/shaxbee/todo-app-skaffold/internal/httprouter"
 	"github.com/shaxbee/todo-app-skaffold/services/todo/model"
 )
 
@@ -65,15 +66,9 @@ func (s *Server) create(w http.ResponseWriter, req *http.Request) error {
 func (s *Server) get(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
-	rawID := httprouter.ParamsFromContext(ctx).ByName("id")
-
-	id, err := uuid.Parse(rawID)
+	id, err := idParam(ctx)
 	if err != nil {
-		return httprouter.NewError(
-			http.StatusBadRequest,
-			httprouter.Message("invalid id"),
-			httprouter.Cause(err),
-		)
+		return err
 	}
 
 	t, err := s.queries.Get(ctx, id)
@@ -119,15 +114,9 @@ func (s *Server) list(w http.ResponseWriter, req *http.Request) error {
 func (s *Server) delete(w http.ResponseWriter, req *http.Request) error {
 	ctx := req.Context()
 
-	rawID := httprouter.ParamsFromContext(ctx).ByName("id")
-
-	id, err := uuid.Parse(rawID)
+	id, err := idParam(ctx)
 	if err != nil {
-		return httprouter.NewError(
-			http.StatusBadRequest,
-			httprouter.Message("invalid id"),
-			httprouter.Cause(err),
-		)
+		return err
 	}
 
 	n, err := s.queries.Delete(ctx, id)
@@ -154,4 +143,20 @@ func (s *Server) deleteAll(w http.ResponseWriter, req *http.Request) error {
 	w.WriteHeader(http.StatusNoContent)
 
 	return nil
+}
+
+func idParam(ctx context.Context) (uuid.UUID, error) {
+	params := httprouter.GetParams(ctx)
+	rawID := params["id"]
+
+	id, err := uuid.Parse(rawID)
+	if err != nil {
+		return uuid.Nil, httprouter.NewError(
+			http.StatusBadRequest,
+			httprouter.Message("invalid id"),
+			httprouter.Cause(err),
+		)
+	}
+
+	return id, nil
 }

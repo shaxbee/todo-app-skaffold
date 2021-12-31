@@ -8,10 +8,11 @@ import (
 	"os"
 	"sync"
 
+	"github.com/goes-funky/httprouter"
+	"github.com/goes-funky/httprouter/middleware/cors"
+	"github.com/goes-funky/httprouter/zapdriver"
 	"go.uber.org/zap"
 
-	"github.com/shaxbee/todo-app-skaffold/internal/httprouter"
-	"github.com/shaxbee/todo-app-skaffold/internal/middleware/cors"
 	"github.com/shaxbee/todo-app-skaffold/services/todo"
 )
 
@@ -96,11 +97,13 @@ func (c *container) httpRouter() *httprouter.Router {
 			httprouter.WithVerbose(c.config.Dev),
 		}
 
+		opts = append(opts, zapdriver.RouterOpts(c.logger())...)
+
 		if c.config.Server.CorsEnabled {
 			opts = append(opts, cors.RouterOpts()...)
 		}
 
-		router := httprouter.New(c.logger(), opts...)
+		router := httprouter.New(opts...)
 		todoServer.RegisterRoutes(router)
 
 		c.state.httpRouter = router

@@ -1,3 +1,3 @@
-FROM swaggerapi/swagger-ui
+FROM expend/swagger-ui
 COPY api-spec/api.yaml /usr/share/nginx/html/
 ENV PORT=80
